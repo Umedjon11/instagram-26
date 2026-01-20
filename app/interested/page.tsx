@@ -1,7 +1,8 @@
+import React from 'react'
 
 const Interested = () => {
   return (
-    <div>Interested</div>
+    <div className='w-[82%] ml-auto'>Interested</div>
   )
 }
 
