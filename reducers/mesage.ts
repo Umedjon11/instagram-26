@@ -38,10 +38,11 @@ export const deleteChatById = createAsyncThunk(
   "chats/deleteChatById",
   async (chatId: number) => {
     try {
-      const { data } = await axiosRequest.delete(`/Chat/delete-chat?chatId=${chatId}`);
+      const { data } = await axiosRequest.delete(
+        `/Chat/delete-chat?chatId=${chatId}`,
+      );
       return data;
-    } 
-    catch (error) {
+    } catch (error) {
       isLogined(error);
       console.error(error);
     }
@@ -54,7 +55,7 @@ export const sendChatMessage = createAsyncThunk(
     try {
       const formData = new FormData();
       formData.append("ChatId", String(chatId));
-      formData.append("MessageText", message);         
+      formData.append("MessageText", message);
 
       const { data } = await axiosRequest.put("/Chat/send-message", formData);
       return data;
@@ -62,33 +63,51 @@ export const sendChatMessage = createAsyncThunk(
       isLogined(error);
       console.error(error);
     }
-  }
+  },
 );
 
+export const deleteMessage = createAsyncThunk(
+  "chats/deleteMessage",
+  async (chatsId: number) => {
+    try {
+      const { data } = await axiosRequest.delete(
+        `/Chat/delete-message?massageId=${chatsId}`,
+      );
+      return data;
+    } catch (error) {
+      isLogined(error);
+      console.error(error);
+    }
+  },
+);
 
 export const chatsSlice = createSlice({
   name: "chats",
-  initialState,
+  initialState: { chats: [], loading: false, error: null },
   reducers: {},
   extraReducers: (builder) => {
-  builder
-    .addCase(getChats.pending, (state) => {
-      state.loading = true;
-      state.error = null;
-    })
-    .addCase(getChats.fulfilled, (state, action) => {
-      state.loading = false;
-      state.chats = action.payload;
-    })
-    .addCase(getChatById.pending, (state) => {
-      state.loading = true;
-    })
-    .addCase(getChatById.fulfilled, (state, action) => {
-      state.loading = false;
-      state.chatById = action.payload.data;
-    })
-  
-}
+    builder
+      .addCase(getChats.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getChats.fulfilled, (state, action) => {
+        state.loading = false;
+        state.chats = action.payload;
+      })
+      .addCase(getChatById.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getChatById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.chatById = action.payload.data;
+      })
+      .addCase(deleteMessage.fulfilled, (state, action) => {
+        // action.meta.arg — это id, который мы отправляли
+        const deletedId = action.meta.arg;
+        state.chats = state.chats.filter((msg) => msg.messageId !== deletedId);
+      })
+  },
 });
 
 export default chatsSlice.reducer;
