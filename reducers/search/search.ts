@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
-import { getSearchHistory } from './api'
+import { getSearchHistory, SearchProfiles } from './api'
 
 export interface SearchState {
     searchHistory: IHistory[]
@@ -37,6 +37,18 @@ export const searchSlice = createSlice({
             state.isLoading = false
         })
         build.addCase(getSearchHistory.rejected, (state) => {
+            state.isLoading = false
+            state.searchHistory = []
+        })
+        build.addCase(SearchProfiles.pending, (state) => {
+            state.isLoading = true
+            state.searchHistory = []
+        })
+        build.addCase(SearchProfiles.fulfilled, (state, { payload }) => {
+            state.searchHistory = payload
+            state.isLoading = false
+        })
+        build.addCase(SearchProfiles.rejected, (state) => {
             state.isLoading = false
             state.searchHistory = []
         })
