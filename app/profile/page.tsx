@@ -37,7 +37,7 @@ export default function Page() {
   if (isLoading) {
     return (
       <div className="w-[82%] ml-auto min-h-screen px-10 py-8">
-        Loading...
+        Loading....
       </div>
     );
   }
