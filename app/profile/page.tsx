@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Post } from "./types/types";
+import { getToken } from "@/utils/axios";
 
 export default function Page() {
   const dispatch = useDispatch<AppDispatch>();
@@ -32,7 +33,7 @@ export default function Page() {
   >("Posts");
 
 
-  const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaWQiOiI4YjllOWY0Mi1iMTE3LTQxY2ItOWY2Ny1jMzBjNTBhNmExM2MiLCJuYW1lIjoidW1lZGpvbjI3IiwiZW1haWwiOiJuYXphcm92dW1lZDg4QGdtYWlsLmNvbSIsInN1YiI6IiIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlVzZXIiLCJleHAiOjE3Njg5OTYyMDMsImlzcyI6Imluc3RhZ3JhbS1ncm91cCIsImF1ZCI6Imluc3RhZ3JhbS1hcGkifQ.JQq9XYDic8Q-iRS_zxJEgyBOJnyu0KadqVr0IJ6J-4s";
+  const token = getToken()
   const decoded: string = jwtDecode(token);
   const userId = decoded.sid;
   console.log(userId);

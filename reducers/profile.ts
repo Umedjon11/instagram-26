@@ -5,6 +5,7 @@ import {
   GetFolowings,
   GetPosts,
   GetProfile,
+  UpdateUserProfile,
 } from "./apiProfile";
 
 export interface CounterState {
@@ -134,6 +135,16 @@ export const counterSlice = createSlice({
     builder.addCase(GetById.rejected, (state) => {
       state.isLoading = false;
     });
+    builder
+      .addCase(UpdateUserProfile.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(UpdateUserProfile.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(UpdateUserProfile.rejected, (state) => {
+        state.isLoading = false;
+      });
   },
 });
 

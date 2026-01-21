@@ -65,3 +65,25 @@ export const GetById = createAsyncThunk(
     }
   },
 );
+
+export const UpdateUserProfile = createAsyncThunk(
+  "profile/UpdateUserProfile",
+  async (
+    payload: {
+      about: string;
+      gender: number;
+    },
+    { rejectWithValue },
+  ) => {
+    try {
+      const { data } = await axiosRequest.put(
+        "/UserProfile/update-user-profile",
+        payload,
+      );
+
+      return data;
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data || "Update profile error");
+    }
+  },
+);

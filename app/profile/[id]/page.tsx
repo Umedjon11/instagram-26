@@ -16,8 +16,8 @@ import {
 import { useParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { GetById } from "@/reducers/apiProfile";
-import { useEffect } from "react";
+import { GetById, GetProfile, UpdateUserProfile } from "@/reducers/apiProfile";
+import { useEffect, useState } from "react";
 
 export default function EditProfilePage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -26,6 +26,10 @@ export default function EditProfilePage() {
     (state: RootState) => state.counter
   );
 
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [about, setAbout] = useState("");
+  const [gender, setGender] = useState<number>(0);
 
   const params = useParams();
   const userId = params.id as string;
@@ -35,6 +39,35 @@ export default function EditProfilePage() {
       dispatch(GetById(userId));
     }
   }, [dispatch, userId]);
+
+  useEffect(() => {
+    if (dataById) {
+      setFirstName(dataById.firstName || "");
+      setLastName(dataById.lastName || "");
+      setAbout(dataById.about || "");
+      setGender(dataById.gender ?? 0);
+    }
+  }, [dataById]);
+
+  const handleSubmit = async () => {
+    try {
+      await dispatch(
+        UpdateUserProfile({
+          about,
+          gender,
+        })
+      ).unwrap();
+
+      // обновляем профиль после сохранения
+      dispatch(GetProfile());
+
+      alert("Profile updated successfully");
+    } catch (error) {
+      console.error(error);
+      alert("Update failed");
+    }
+  };
+
 
   if (isLoading || !dataById) {
     return <div className="p-10">Loading...</div>;
@@ -131,14 +164,16 @@ export default function EditProfilePage() {
             Change photo
           </button>
         </div>
-        <label>Last name</label>
-          <input
-          defaultValue={dataById.firstName}
-          className="w-full border rounded-xl px-4 py-3 text-sm mb-3"
-        />
         <label>First name</label>
         <input
-          defaultValue={dataById.lastName}
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          className="w-full border rounded-xl px-4 py-3 text-sm mb-3"
+        />
+        <label>Last name</label>
+        <input
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
           className="w-full border rounded-xl px-4 py-3 text-sm mb-3"
         />
         <div className="mb-8">
@@ -159,7 +194,8 @@ export default function EditProfilePage() {
             Bio
           </label>
           <textarea
-            defaultValue={dataById?.about}
+            value={about}
+            onChange={(e) => setAbout(e.target.value)}
             maxLength={150}
             className="w-full h-28 border rounded-xl px-4 py-3 text-sm resize-none"
           />
@@ -167,20 +203,20 @@ export default function EditProfilePage() {
             0 / 150
           </div>
         </div>
-
-        {/* GENDER */}
         <div className="mb-10">
           <label className="block mb-2 font-semibold">
             Gender
           </label>
-          <select className="w-full border rounded-xl px-4 py-3 text-sm">
-            <option>Prefer not to say</option>
-            <option>Male</option>
-            <option>Female</option>
+          <select
+            value={gender}
+            onChange={(e) => setGender(Number(e.target.value))}
+            className="w-full border rounded-xl px-4 py-3 dark:bg-black text-sm"
+          >
+            <option value={0}>Prefer not to say</option>
+            <option value={1}>Male</option>
+            <option value={2}>Female</option>
           </select>
         </div>
-
-        {/* THREADS */}
         <div className="flex items-center justify-between border-t pt-6 mb-10">
           <div>
             <p className="font-semibold">
@@ -193,9 +229,10 @@ export default function EditProfilePage() {
 
           <input type="checkbox" className="w-5 h-5" />
         </div>
-
-        {/* SAVE */}
-        <button className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700">
+        <button
+          onClick={handleSubmit}
+          className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700"
+        >
           Submit
         </button>
       </main>
