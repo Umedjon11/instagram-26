@@ -1,7 +1,7 @@
 "use client"
 
 import { LogIn } from "@/apis/auth/login"
-import { Facebook } from "lucide-react"
+import { Eye, EyeOff, Facebook } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form"
 const LoginForm = () => {
     const { register, handleSubmit } = useForm()
     const [error, setError] = useState<null | string>(null)
-
+    const [seePass, setSeePass] = useState<boolean>(false)
     const Login = async (data: any) => {
         const result = await LogIn(data)
         if (result) {
@@ -18,9 +18,12 @@ const LoginForm = () => {
     }
     return (
         <form onSubmit={handleSubmit(Login)} className="w-full flex flex-col gap-[1vh]">
-            <input {...register("userName")} required className="w-full border rounded-[3px] p-[1.3vh_20px]" placeholder="User name" />
-            <input {...register("password")} required className="w-full border rounded-[3px] p-[1.3vh_20px]" placeholder="Password" />
-            <button className="bg-[#4A5DF9] w-full rounded-[3px] text-white font-semibold mt-[1vh] p-[1vh_0] cursor-pointer">Login</button>
+            <input suppressHydrationWarning={true} {...register("userName")} required className="w-full border rounded-[3px] p-[1.3vh_20px]" placeholder="User name" />
+            <div className="flex gap-2 items-center border w-full rounded-[3px]">
+                <input suppressHydrationWarning={true} {...register("password")} required type={seePass ? "text" : "password"} className="w-[89%] rounded-[3px] p-[1.3vh_20px]" placeholder="Password" />
+                <button suppressHydrationWarning={true} type="button" className="cursor-pointer" onClick={() => setSeePass(!seePass)}>{seePass ? (<EyeOff />) : (<Eye />)}</button>
+            </div>
+            <button suppressHydrationWarning={true} className="bg-[#4A5DF9] w-full rounded-[3px] text-white font-semibold mt-[1vh] p-[1vh_0] cursor-pointer">Login</button>
             <div className="flex justify-between m-[2vh_0] items-center w-full">
                 <p className="w-[43%] border"></p>
                 <p className="text-[#E5E5E5]">Or</p>
