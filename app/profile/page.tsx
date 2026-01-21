@@ -1,18 +1,24 @@
 "use client";
 
+import FollowersDialog from "@/components/folowers";
+import FollowingDialog from "@/components/folowing";
 import { GetPosts, GetProfile } from "@/reducers/apiProfile";
 import { AppDispatch, RootState } from "@/store/store";
 import { jwtDecode } from "jwt-decode";
+import { Bookmark, Contact, Grid3x3 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Post } from "./types/types";
 
 export default function Page() {
   const dispatch = useDispatch<AppDispatch>();
   const { data, isLoading, posts } = useSelector((state: RootState) => state.counter);
   const api = 'https://instagram-api.softclub.tj'
   const postsRef = useRef<HTMLDivElement | null>(null);
+  const [followersOpen, setFollowersOpen] = useState(false);
+  const [followingsOpen, setFollowingsOpen] = useState(false);
 
   const scrollToPosts = () => {
     postsRef.current?.scrollIntoView({
@@ -21,9 +27,16 @@ export default function Page() {
     });
   };
 
+  const [activeTab, setActiveTab] = useState<
+    "Posts" | "Saved" | "Tagged"
+  >("Posts");
+
+
   const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaWQiOiI4YjllOWY0Mi1iMTE3LTQxY2ItOWY2Ny1jMzBjNTBhNmExM2MiLCJuYW1lIjoidW1lZGpvbjI3IiwiZW1haWwiOiJuYXphcm92dW1lZDg4QGdtYWlsLmNvbSIsInN1YiI6IiIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlVzZXIiLCJleHAiOjE3Njg5OTYyMDMsImlzcyI6Imluc3RhZ3JhbS1ncm91cCIsImF1ZCI6Imluc3RhZ3JhbS1hcGkifQ.JQq9XYDic8Q-iRS_zxJEgyBOJnyu0KadqVr0IJ6J-4s";
-  const decoded: any = jwtDecode(token);
+  const decoded: string = jwtDecode(token);
   const userId = decoded.sid;
+  console.log(userId);
+
 
   useEffect(() => {
     dispatch(GetProfile());
@@ -64,9 +77,11 @@ export default function Page() {
             <span className="text-xl">
               {data.userName}
             </span>
-            <button className="px-4 py-1.5 rounded-lg border text-sm">
-              Edit profile
-            </button>
+            <Link href={`/profile/${userId}`}>
+              <button className="cursor-pointer px-4 py-1.5 rounded-lg border text-sm">
+                Edit profile
+              </button>
+            </Link>
             <button className="px-4 py-1.5 rounded-lg border text-sm">
               View archive
             </button>
@@ -76,10 +91,16 @@ export default function Page() {
             <span onClick={scrollToPosts} className="cursor-pointer">
               <strong>{data.postCount}</strong> posts
             </span>
-            <span>
+            <span
+              className="cursor-pointer"
+              onClick={() => setFollowersOpen(true)}
+            >
               <strong>{data.subscribersCount}</strong> followers
             </span>
-            <span>
+            <span
+              className="cursor-pointer"
+              onClick={() => setFollowingsOpen(true)}
+            >
               <strong>{data.subscriptionsCount}</strong> following
             </span>
           </div>
@@ -95,44 +116,97 @@ export default function Page() {
       </div>
 
       <div className="mt-16" ref={postsRef}>
-        <div className="flex gap-12 border-t justify-center text-xs uppercase tracking-widest">
-          <div
-            className="py-4 border-t -mt-px cursor-pointer"
-            onClick={scrollToPosts}
+        <div className="flex gap-12 border-t justify-center">
+          <button
+            className={`cursor-pointer flex items-center gap-1 pt-2 ${activeTab === "Posts"
+              ? "text-blue-500 font-semibold border-t border-blue-500"
+              : "text-gray-800"
+              }`}
+            onClick={() => {
+              setActiveTab("Posts");
+              scrollToPosts()
+            }}
           >
+            <Grid3x3 />
             Posts
-          </div>
-          <div className="py-4">Reels</div>
-          <div className="py-4">Saved</div>
-          <div className="py-4">Tagged</div>
+          </button>
+          <button onClick={() => {
+            setActiveTab("Saved");
+          }} className={`cursor-pointer flex items-center gap-1 pt-2 ${activeTab === "Saved"
+            ? "text-blue-500 font-semibold border-t border-blue-500"
+            : "text-gray-800"
+            }`}>
+            <Bookmark />
+            Saved
+          </button>
+          <button onClick={() => {
+            setActiveTab("Tagged");
+          }} className={`cursor-pointer flex items-center gap-1 pt-2 ${activeTab === "Tagged"
+            ? "text-blue-500 font-semibold border-t border-blue-500"
+            : "text-gray-800"
+            }`}>
+            <Contact />
+            Tagged
+          </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-1 mt-1">
-          {posts.length > 0 ? (
-            posts.map((post: any) => (
-              <div key={post.postId} className="aspect-square overflow-hidden">
-                <img
-                  src={`${api}/images/${post.images[0]}`}
-                  alt="post"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ))
-          ) : (
+        <div className="mt-10">
+          {activeTab === "Posts" && (
+            <div className="grid grid-cols-3 gap-1">
+              {posts.length > 0 ? (
+                posts.map((post: any) => (
+                  <div key={post.postId} className="aspect-square overflow-hidden">
+                    <img
+                      src={`${api}/images/${post.images[0]}`}
+                      alt="post"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-3 flex flex-col items-center justify-center h-96 gap-4">
+                  <Image src="/image 77.png" alt="camera" width={100} height={100} />
+                  <span className="text-lg font-semibold">Share Photos</span>
+                  <span className="text-sm opacity-70"> When you share photos, they will appear on your profile. </span>
+                  <Link href="/add-post" className="text-[#3B82F6] font-semibold">
+                    Share your first photo
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "Saved" && (
             <div className="col-span-3 flex flex-col items-center justify-center h-96 gap-4">
-              <Image src="/image 77.png" alt="camera" width={100} height={100} />
-              <span className="text-lg font-semibold">Share Photos</span>
-              <span className="text-sm opacity-70">
-                When you share photos, they will appear on your profile.
-              </span>
-              <Link href="/add-post" className="text-[#3B82F6] font-semibold">
-                Share your first photo
+              <Image src="/image 78.png" alt="camera" width={100} height={100} />
+              <span className="text-lg font-semibold">You saves</span>
+              <span className="text-sm opacity-70">Only you can see what youve saved</span>
+              <Link href="/reels" className="text-[#3B82F6] font-semibold">
+                + New collection
               </Link>
+            </div>
+          )}
+
+          {activeTab === "Tagged" && (
+            <div className="col-span-3 flex flex-col items-center justify-center h-96 gap-4">
+              <Image src="/image 79.png" alt="camera" width={100} height={100} />
+              <span className="text-lg font-semibold">You have not tagged</span>
+              <span className="text-sm opacity-70">Here show the photos and videos in which you have been tagged</span>
             </div>
           )}
         </div>
 
       </div>
+      <FollowersDialog
+        open={followersOpen}
+        onOpenChange={setFollowersOpen}
+        userId={userId}
+      />
+      <FollowingDialog
+        open={followingsOpen}
+        onOpenChange={setFollowingsOpen}
+        userId={userId}
+      />
     </div>
   );
 }
