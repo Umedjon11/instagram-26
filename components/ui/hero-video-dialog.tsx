@@ -73,7 +73,6 @@ export default function UploadPostModal() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
       <div className="w-auto rounded-xl bg-[#262626] text-white overflow-hidden">
-        {/* Header */}
         <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
           {step > 0 ? (
             <button onClick={() => setStep((s) => (s > 0 ? s - 1 : s))}>
@@ -105,9 +104,7 @@ export default function UploadPostModal() {
           )}
         </div>
 
-        {/* Body */}
         <div className="flex">
-          {/* Image Upload / Preview */}
           <div
             onClick={() => step === 0 && inputRef.current?.click()}
             className="relative h-125 w-125 cursor-pointer overflow-hidden"
@@ -150,10 +147,8 @@ export default function UploadPostModal() {
             />
           </div>
 
-          {/* Step 1: Edit */}
           {step === 1 && (
             <div className="w-65 border-l border-white/10 p-3 space-y-3">
-              {/* Tabs */}
               <div className="flex">
                 <button
                   onClick={() => setTab(1)}
@@ -171,7 +166,6 @@ export default function UploadPostModal() {
                 </button>
               </div>
 
-              {/* Filters */}
               {tab === 1 && (
                 <div className="grid grid-cols-2 gap-3">
                   {Object.entries(FILTERS).map(([key, value]) => (
@@ -187,7 +181,6 @@ export default function UploadPostModal() {
                 </div>
               )}
 
-              {/* Adjust */}
               {tab === 2 && (
                 <div>
                   {[
@@ -218,7 +211,6 @@ export default function UploadPostModal() {
             </div>
           )}
 
-          {/* Step 2: Share */}
           {step === 2 && (
             <div className="w-85 border-l border-white/10 bg-black p-4 text-white">
               <div className="mb-4 flex items-center gap-3">
