@@ -87,3 +87,31 @@ export const UpdateUserProfile = createAsyncThunk(
     }
   },
 );
+
+export const UpdateUserImage = createAsyncThunk(
+  "profile/UpdateUserImage",
+  async (file: File, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      formData.append("Image", file);
+
+      const { data } = await axiosRequest.put(
+        "/UserProfile/update-user-image-profile",
+        formData,
+      );
+
+      return data;
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data || "Update image error");
+    }
+  },
+);
+
+export const GetInfoById = createAsyncThunk("profile/GetInfoById", async (userId: string) => {
+  try {
+    const { data } = await axiosRequest.get(`/UserProfile/get-user-profile-by-id?id=${userId}`);
+    return data.data;
+  } catch (error) {
+    console.error(error);
+  }
+});

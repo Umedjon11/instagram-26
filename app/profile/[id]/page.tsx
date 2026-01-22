@@ -16,8 +16,8 @@ import {
 import { useParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { GetById, GetProfile, UpdateUserProfile } from "@/reducers/apiProfile";
-import { useEffect, useState } from "react";
+import { GetById, GetProfile, UpdateUserImage, UpdateUserProfile } from "@/reducers/apiProfile";
+import { useEffect, useRef, useState } from "react";
 
 export default function EditProfilePage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -30,6 +30,32 @@ export default function EditProfilePage() {
   const [lastName, setLastName] = useState("");
   const [about, setAbout] = useState("");
   const [gender, setGender] = useState<number>(0);
+  const api = 'https://instagram-api.softclub.tj'
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+
+  const handleChangePhotoClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setAvatarPreview(URL.createObjectURL(file));
+
+    try {
+      await dispatch(UpdateUserImage(file)).unwrap();
+      dispatch(GetProfile());
+      dispatch(GetById(userId));
+    } catch (err) {
+      console.error(err);
+      alert("Avatar upload failed");
+    }
+  };
+
 
   const params = useParams();
   const userId = params.id as string;
@@ -58,7 +84,6 @@ export default function EditProfilePage() {
         })
       ).unwrap();
 
-      // обновляем профиль после сохранения
       dispatch(GetProfile());
 
       alert("Profile updated successfully");
@@ -147,22 +172,47 @@ export default function EditProfilePage() {
         </h2>
         <div className="rounded-2xl p-6 flex items-center justify-between mb-10 bg-muted">
           <div className="flex items-center gap-4">
-            <Image
-              src="/user.png"
-              alt="avatar"
-              width={64}
-              height={64}
-              className="rounded-full object-cover"
-            />
+            {avatarPreview ? (
+              <img
+                src={avatarPreview}
+                alt="preview"
+                className="rounded-full object-cover w-[64px] h-[64px]"
+              />
+            ) : dataById.image ? (
+              <img
+                src={`${api}/images/${dataById.image}`}
+                alt="avatar"
+                className="rounded-full object-cover w-[64px] h-[64px]"
+              />
+            ) : (
+              <Image
+                src="/user.png"
+                alt="default avatar"
+                width={64}
+                height={64}
+                className="rounded-full object-cover"
+              />
+            )}
             <div>
               <p className="font-semibold">{dataById.userName}</p>
               <p><span>{dataById.firstName} {dataById.lastName}</span></p>
             </div>
           </div>
 
-          <button className="bg-blue-600 text-white text-sm px-4 py-2 rounded-lg font-semibold hover:bg-blue-700">
+          <button
+            onClick={handleChangePhotoClick}
+            className="bg-blue-600 text-white text-sm px-4 py-2 rounded-lg font-semibold hover:bg-blue-700"
+          >
             Change photo
           </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={handleFileChange}
+          />
+
         </div>
         <label>First name</label>
         <input

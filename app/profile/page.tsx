@@ -10,16 +10,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Post } from "./types/types";
 import { getToken } from "@/utils/axios";
+import InstagramLoading from "@/components/InstagramLoading";
 
 export default function Page() {
   const dispatch = useDispatch<AppDispatch>();
-  const { data, isLoading, posts } = useSelector((state: RootState) => state.counter);
+  const { data, posts } = useSelector((state: RootState) => state.counter);
   const api = 'https://instagram-api.softclub.tj'
   const postsRef = useRef<HTMLDivElement | null>(null);
   const [followersOpen, setFollowersOpen] = useState(false);
   const [followingsOpen, setFollowingsOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+
 
   const scrollToPosts = () => {
     postsRef.current?.scrollIntoView({
@@ -47,14 +49,17 @@ export default function Page() {
     }
   }, [dispatch, userId]);
 
+  useEffect(() => {
+    if (data && posts) {
+      setLoading(false);
+    }
+  }, [data, posts]);
 
-  if (isLoading) {
-    return (
-      <div className="w-[82%] ml-auto min-h-screen px-10 py-8">
-        Loading....
-      </div>
-    );
+
+  if (loading) {
+    return <InstagramLoading />;
   }
+
 
   return (
     <div className="w-[82%] ml-auto min-h-screen px-10 py-8">

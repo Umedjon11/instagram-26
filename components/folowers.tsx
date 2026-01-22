@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 type FollowersDialogProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    userId: string;
+    userId?: string;
 };
 
 export default function FollowersDialog({

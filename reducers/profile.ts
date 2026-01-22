@@ -3,6 +3,7 @@ import {
   GetById,
   GetFolowers,
   GetFolowings,
+  GetInfoById,
   GetPosts,
   GetProfile,
   UpdateUserProfile,
@@ -143,6 +144,16 @@ export const counterSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(UpdateUserProfile.rejected, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(GetInfoById.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(GetInfoById.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.dataById = action.payload;
+      })
+      .addCase(GetInfoById.rejected, (state) => {
         state.isLoading = false;
       });
   },
