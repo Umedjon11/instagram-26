@@ -1,3 +1,4 @@
+import  homeSlice  from '@/reducers/home';
 import reelsReducer from '@/reducers/reels';
 import { chatsSlice } from "@/reducers/mesage";
 import counterSlice from "@/reducers/profile";
@@ -9,7 +10,8 @@ export const store = configureStore({
     getChats: chatsSlice.reducer,
     counter: counterSlice,
     reels: reelsReducer,
-    search: searchSlice
+    search: searchSlice,
+    home: homeSlice
   },
 })
 
