@@ -4,6 +4,7 @@ const AddPost = () => {
   return (
     <UploadPostModal />
   )
+  
 }
 
 export default AddPost

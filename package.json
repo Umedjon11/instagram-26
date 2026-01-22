@@ -11,13 +11,19 @@
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
+<<<<<<< HEAD
     "@radix-ui/react-switch": "^1.2.6",
+=======
+>>>>>>> 677618f07c37a86041c59231b9fa1fa63a48fb02
     "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-switch": "^1.2.6",
     "@reduxjs/toolkit": "^2.11.2",
     "antd": "^6.2.1",
+    "audio-recorder-polyfill": "^0.4.1",
     "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "emoji-picker-react": "^4.16.1",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.562.0",
     "motion": "^12.27.5",
@@ -29,6 +35,7 @@
     "react-hook-form": "^7.71.1",
     "react-insta-stories": "^2.8.0",
     "react-redux": "^9.2.0",
+    "react-speech-recognition": "^4.0.1",
     "swiper": "^12.0.3",
     "tailwind-merge": "^3.4.0"
   },
