@@ -6,6 +6,7 @@ const Register = () => {
   return (
     <main className="flex justify-between w-[80%] sm:w-[70%] m-[0_auto] h-screen items-center">
       <Image
+        draggable={false}
         src="/loginImage.png"
         alt="Image"
         width={600}
