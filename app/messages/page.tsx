@@ -13,6 +13,7 @@ import { useRef } from "react";
 
 import {
   Bell,
+  Check,
   ChevronDown,
   DeleteIcon,
   Image,
@@ -31,7 +32,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import EmojiPicker from "emoji-picker-react";
-
+0;
 const Messages = () => {
   const dispatch = useDispatch() as any;
   const { chats, chatById, data } = useSelector((state: any) => state.getChats);
@@ -76,6 +77,7 @@ const Messages = () => {
   }, [dispatch]);
 
   const [message, setMessage] = useState("");
+
   const [openSendMessage, setOpenSendMessage] = useState<any>(false);
   const [openInfoPanel, setOpenInfoPanel] = useState(false);
 
@@ -235,12 +237,14 @@ const Messages = () => {
                 >
                   <img
                     className="w-12 h-12 rounded-full object-cover"
-                    src={`https://instagram-api.softclub.tj/images/${e.sendUserImage}`}
+                    src={`https://instagram-api.softclub.tj/images/${
+                      e.sendUserImage
+                    }`}
                     alt=""
                   />
                   <div className="flex flex-col">
                     <h1>{e.sendUserName}</h1>
-                    <p className="text-[13px] text-[grey]">Active 4h ago</p>
+                    <p className="text-[13px] text-[grey]"  >Active 4h ago</p>
                   </div>
                 </div>
               ))}
@@ -277,7 +281,9 @@ const Messages = () => {
                   <div className="flex items-center gap-5">
                     <img
                       className="w-12 h-12 rounded-full"
-                      src={`https://instagram-api.softclub.tj/images/${activeChat.sendUserImage}`}
+                      src={`https://instagram-api.softclub.tj/images/${
+                        activeChat.sendUserImage
+                      }`}
                       alt="error"
                     />
                     <div className="flex flex-col">
@@ -326,16 +332,28 @@ const Messages = () => {
                       </button>
                     </Link>
                   </div>
-                  <div className="flex flex-col gap-3 w-full px-4">
+                  <div className="flex flex-col gap-1 w-full px-4 items-end">
                     {chatById?.map((msg: any) => (
                       <div
                         key={msg.messageId}
-                        className={`group relative flex ${
-                          msg.isMine ? "justify-end" : "justify-start"
+                        className={`group relative flex items-center gap-2 ${
+                          msg.isMine ? "ml-auto" : ""
                         }`}
                       >
                         {!msg.isMine && (
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1 mr-2">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
+                            <button
+                              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+                              onClick={() =>
+                                dispatch(deleteMessage(msg.messageId))
+                              }
+                              title="Удалить"
+                            >
+                              <DeleteIcon
+                                size={14}
+                                className="text-gray-500"
+                              />{" "}
+                            </button>
                             <button
                               className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
                               onClick={() =>
@@ -349,17 +367,17 @@ const Messages = () => {
                         )}
 
                         <div
-                          className={`flex flex-col p-2 px-3 rounded-2xl max-w-[300px] break-words whitespace-pre-wrap ${
+                          className={`flex flex-col p-1 px-2 rounded-2xl max-w-[300px] break-words whitespace-pre-wrap ${
                             msg.isMine
                               ? "bg-blue-500 text-white"
-                              : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
+                              : "bg-blue-500 text-[white]"
                           }`}
                         >
                           {msg.messageText}
                         </div>
 
                         {msg.isMine && (
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1 ml-2">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
                             <button
                               className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
                               onClick={() =>
@@ -368,15 +386,6 @@ const Messages = () => {
                               title="Копировать"
                             >
                               <SquarePen size={14} className="text-gray-500" />
-                            </button>
-                            <button
-                              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
-                              onClick={() =>
-                                dispatch(deleteMessage(msg.messageId))
-                              }
-                              title="Удалить"
-                            >
-                              <DeleteIcon size={14} className="text-gray-500" />
                             </button>
                           </div>
                         )}
@@ -586,7 +595,7 @@ const Messages = () => {
             </div>
             <div className="mb-10 p-3">
               <h1 className="font-medium">Suggested</h1>
-              <div className="flex flex-col overflow-x-auto h-100 items-start gap-3 mt-2">
+              <div className="flex flex-col  overflow-x-auto h-100 items-start gap-3 mt-2">
                 {data
                   ?.filter((item) =>
                     item.userName.toLowerCase().includes(search.toLowerCase()),
@@ -600,7 +609,9 @@ const Messages = () => {
                         <div className="flex gap-2">
                           <img
                             className="w-12 h-12 rounded-full object-cover"
-                            src={`https://instagram-api.softclub.tj/images/${item.avatar}`}
+                            src={`https://instagram-api.softclub.tj/images/${
+                              item.avatar || item.avatar
+                            }`}
                             alt=""
                           />
                           <div className="flex flex-col items-start">
@@ -612,11 +623,7 @@ const Messages = () => {
                         </div>
 
                         <div>
-                          <input
-                            name="senf"
-                            type="radio"
-                            className="w-5 h-5 accent-blue-500"
-                          />
+                          <input name="senf" type="radio" className="w-5 h-5 accent-blue-500" />
                         </div>
                       </div>
                     );
