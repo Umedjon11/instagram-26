@@ -1,10 +1,14 @@
 "use client";
-import { getChats, getChatById, deleteChatById } from "@/reducers/mesage";
+import {
+  getChats,
+  getChatById,
+  deleteChatById,
+  sendChatMessage,
+} from "@/reducers/mesage";
 import { Switch } from "antd";
 
 import {
   Bell,
-  Check,
   ChevronDown,
   Image,
   Info,
@@ -18,23 +22,47 @@ import {
   Video,
   X,
 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 const Messages = () => {
   const dispatch = useDispatch();
-  const { chats } = useSelector((state: any) => state.getChats);
-
+  const { chats, chatById } = useSelector((state: any) => state.getChats);
   const [activeChat, setActiveChat] = useState<any>(null);
+  const [messages, setMessages] = useState<any[]>([]);
 
   const openChat = (chat: any) => {
     setActiveChat(chat);
-    dispatch(getChatById(chat.chatId));
+    dispatch(getChatById(chat.chatId)).then((res: any) => {
+      if (res.payload?.messages) {
+        setMessages(res.payload.messages);
+      }
+    });
+  };
+
+  const handleSendMessage = () => {
+    if (!message.trim() || !activeChat) return;
+
+    dispatch(
+      sendChatMessage({
+        chatId: activeChat.chatId,
+        message: message.trim(),
+      }),
+    ).then((res: any) => {
+      if (res.payload) {
+        setMessages((prev: any) => [...prev, { ...res.payload, isMine: true }]);
+      }
+    });
+
+    setMessage("");
   };
 
   useEffect(() => {
     dispatch(getChats());
   }, [dispatch]);
+
+  const [message, setMessage] = useState("");
 
   const [openSendMessage, setOpenSendMessage] = useState<any>(false);
   const [openInfoPanel, setOpenInfoPanel] = useState(false);
@@ -86,7 +114,10 @@ const Messages = () => {
                     }`}
                     alt=""
                   />
-                  <h1>{e.receiveUserName}</h1>
+                  <div className="flex flex-col">
+                    <h1>{e.receiveUserName}</h1>
+                    <p className="text-[13px] text-[grey]">Active 4h ago</p>
+                  </div>
                 </div>
               ))}
             </article>
@@ -95,8 +126,13 @@ const Messages = () => {
         <section className="w-full border-l h-auto">
           {!activeChat ? (
             <div className="text-gray-400 text-center mt-20 h-120 gap-5 justify-center flex flex-col items-center">
-              <div className="border border-[2px] border-[black] rounded-[100%] w-37 h-35 flex items-center justify-center">
-                <Send strokeWidth={0.5} color="black" size={70} />
+              <div className="border border-[2px] border-[black] rounded-[100%] w-30 h-30 flex items-center justify-center">
+                <Send
+                  strokeWidth={0.5}
+                  color="black"
+                  size={60}
+                  className="relative top-1 right-1"
+                />
               </div>
               <h1 className="text-[black] text-[25px] font-medium">
                 Your messages
@@ -124,9 +160,7 @@ const Messages = () => {
                       alt="error"
                     />
                     <div className="flex flex-col">
-                      <h1 className="font-medium text-lg">
-                        {activeChat.receiveUserName}
-                      </h1>
+                      <h1>{activeChat.receiveUserName}</h1>
                       <p className="text-[13px] text-[grey]">
                         {activeChat.sendUserName}
                       </p>
@@ -152,8 +186,8 @@ const Messages = () => {
                 </div>
                 <div className="border-t w-[100%]"></div>
 
-                <div className="flex flex-col justify-between h-[650px] p-2">
-                  <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center gap-1">
+                <div className="flex-1 overflow-y-auto flex flex-col justify-between h-[570px] p-2">
+                  <div className=" p-4 flex flex-col items-center gap-1">
                     <img
                       className="w-25 h-25 rounded-full"
                       src={`https://instagram-api.softclub.tj/images/${
@@ -165,25 +199,52 @@ const Messages = () => {
                       {activeChat.receiveUserName}
                     </h1>
                     <p className="text-[grey] text-[13px]">Instagram</p>
-                    <button className="mt-2 bg-[#d9d9d965] font-medium p-1 rounded-[10px] w-30 hover:bg-[#d9d9d9b4]">
-                      View profile
-                    </button>
+                    <Link href={`/profile/${activeChat.id}`}>
+                      <button className="mt-2 bg-[#d9d9d965] font-medium p-1 rounded-[10px] w-30 hover:bg-[#d9d9d9b4]">
+                        View profile
+                      </button>
+                    </Link>
                   </div>
-
-                  <div className="p-4">
-                    <div className="flex items-center gap-2 p-2 border rounded-2xl w-full">
-                      <Smile />
-                      <input
-                        type="text"
-                        placeholder="Message..."
-                        className="flex-1 outline-none bg-transparent"
-                      />
+                  <div className="flex flex-col gap-1">
+                    {chatById?.map((msg: any) => (
+                      <div
+                        key={msg.id}
+                        className={`p-2 m-auto  rounded-2xl hover:${<Send/>} ${
+                          msg.isMine
+                            ? "ml-auto bg-blue-500 text-white"
+                            : "bg-gray-200"
+                        }`}
+                      >
+                        {msg.messageText}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+              <div className="p-4">
+                <div className="flex items-center gap-2 p-2 border rounded-2xl w-full">
+                  <Smile />
+                  <input
+                    type="text"
+                    placeholder="Message..."
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    className="flex-1 outline-none bg-transparent"
+                  />
+                  {message.trim() ? (
+                    <Send
+                      onClick={handleSendMessage}
+                      className="cursor-pointer text-blue-500"
+                    />
+                  ) : (
+                    <>
                       <Mic />
                       <Image />
                       <Sticker />
-                    </div>
-                  </div>
+                    </>
+                  )}
                 </div>
+              </div>
               </div>
 
               {openInfoPanel && (
@@ -278,7 +339,7 @@ const Messages = () => {
             <div className="mb-10 p-3">
               <h1 className="font-medium">Suggested</h1>
               <div className="flex flex-col items-start gap-3 mt-2">
-                {chats?.data.map((item) => {
+                {chats?.data?.map((item) => {
                   return (
                     <div key={item.id} className="flex items-start gap-2">
                       <div className="flex gap-2">
