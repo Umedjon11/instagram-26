@@ -1,5 +1,7 @@
+import { getUserProfileInfo } from '@/apis/user/profile';
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { axiosRequest, isLogined } from "@/utils/axios";
+import { get } from 'http';
 
 const initialState = {
   chats: [],
@@ -29,6 +31,22 @@ export const getUsers = createAsyncThunk("chats/getUsers", async () => {
     console.error(error);
   }
 });
+
+export const getUserProfileInfoById = createAsyncThunk(
+  "user/getUserProfileInfo",
+  async (userId: string) => {
+    try {
+      const response = await axiosRequest.get("/UserProfile/get-user-profile-by-id?id=" + userId);
+      return response.data;
+    } catch (error) {
+      isLogined(error);
+      console.error(error);
+    }
+  },
+);
+
+
+
 
 export const getChatById = createAsyncThunk(
   "chats/getChatById",
@@ -68,12 +86,14 @@ export const sendChatMessage = createAsyncThunk(
       chatId,
       message,
       file,
+      currentUserId, 
     }: {
       chatId: number;
       message?: string;
       file?: File;
+      currentUserId: string;
     },
-    { dispatch },
+    { dispatch }
   ) => {
     try {
       const formData = new FormData();
@@ -87,17 +107,40 @@ export const sendChatMessage = createAsyncThunk(
         formData.append("File", file);
       }
 
-      await axiosRequest.put("/Chat/send-message", formData, {
+      const { data } = await axiosRequest.put("/Chat/send-message", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-
       dispatch(getChatById(chatId));
+      return {
+        ...data, 
+        userId: currentUserId, 
+        isMine: true,
+      };
     } catch (error) {
       isLogined(error);
       console.error(error);
+      throw error;
     }
   },
 );
+
+export const createChat = createAsyncThunk(
+  "chats/createChat",
+  async (receiverUserId: string, { dispatch, rejectWithValue }) => {
+    try {
+      const { data } = await axiosRequest.post(
+        `/Chat/create-chat?receiverUserId=${receiverUserId}`
+      );
+      dispatch(getChats());
+      return data;
+    } catch (error: any) {
+      isLogined(error);
+      console.error(error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 
 export const deleteMessage = createAsyncThunk(
   "chats/deleteMessage",
@@ -185,6 +228,10 @@ export const chatsSlice = createSlice({
       .addCase(getUsers.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
+      })
+      .addCase(getUserProfileInfoById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.data = action.payload;
       });
   },
 });
