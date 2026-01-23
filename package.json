@@ -11,10 +11,7 @@
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
-<<<<<<< HEAD
     "@radix-ui/react-switch": "^1.2.6",
-=======
->>>>>>> 677618f07c37a86041c59231b9fa1fa63a48fb02
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-switch": "^1.2.6",
     "@reduxjs/toolkit": "^2.11.2",

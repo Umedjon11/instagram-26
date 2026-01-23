@@ -93,7 +93,7 @@ export const UpdateUserImage = createAsyncThunk(
   async (file: File, { rejectWithValue }) => {
     try {
       const formData = new FormData();
-      formData.append("Image", file);
+      formData.append("imageFile", file);
 
       const { data } = await axiosRequest.put(
         "/UserProfile/update-user-image-profile",
