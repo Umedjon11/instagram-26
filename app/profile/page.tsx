@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getToken } from "@/utils/axios";
 import InstagramLoading from "@/components/InstagramLoading";
+import PostModal from "@/components/posts";
 
 export default function Page() {
   const dispatch = useDispatch<AppDispatch>();
@@ -21,6 +22,8 @@ export default function Page() {
   const [followersOpen, setFollowersOpen] = useState(false);
   const [followingsOpen, setFollowingsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [postOpen, setPostOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<any>(null);
 
 
   const scrollToPosts = () => {
@@ -55,11 +58,13 @@ export default function Page() {
     }
   }, [data, posts]);
 
+  const isVideo = (file: string) => {
+    return /\.(mp4|webm|ogg|mov)$/i.test(file);
+  };
 
   if (loading) {
     return <InstagramLoading />;
   }
-
 
   return (
     <div className="w-[82%] ml-auto min-h-screen px-10 py-8">
@@ -161,12 +166,26 @@ export default function Page() {
             <div className="grid grid-cols-3 gap-1">
               {posts.length > 0 ? (
                 posts.map((post: any) => (
-                  <div key={post.postId} className="aspect-square overflow-hidden">
-                    <img
-                      src={`${api}/images/${post.images[0]}`}
-                      alt="post"
-                      className="w-full h-full object-cover"
-                    />
+                  <div key={post.postId} className="cursor-pointer aspect-square overflow-hidden bg-black"
+                    onClick={() => {
+                      setSelectedPost(post);
+                      setPostOpen(true);
+                    }}
+                  >
+                    {post.images[0].endsWith(".mp4") ? (
+                      <video
+                        src={`${api}/images/${post.images[0]}`}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        muted
+                        playsInline
+                      />
+                    ) : (
+                      <img
+                        src={`${api}/images/${post.images[0]}`}
+                        alt="post"
+                        className="w-full h-full object-cover"
+                      />
+                    )}
                   </div>
                 ))
               ) : (
@@ -212,6 +231,11 @@ export default function Page() {
         open={followingsOpen}
         onOpenChange={setFollowingsOpen}
         userId={userId}
+      />
+      <PostModal
+        open={postOpen}
+        onOpenChange={setPostOpen}
+        post={selectedPost}
       />
     </div>
   );

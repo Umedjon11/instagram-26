@@ -10,11 +10,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import FollowersDialog from "@/components/folowers";
 import FollowingDialog from "@/components/folowing";
+import PostModal from "@/components/posts";
 
 export default function Page() {
     const dispatch = useDispatch<AppDispatch>();
     const { id } = useParams();
 
+    const [postOpen, setPostOpen] = useState(false);
+    const [selectedPost, setSelectedPost] = useState<any>(null);
     const [followersOpen, setFollowersOpen] = useState(false);
     const [followingsOpen, setFollowingsOpen] = useState(false);
     const [activeTab, setActiveTab] =
@@ -116,12 +119,29 @@ export default function Page() {
                         <div className="grid grid-cols-3 gap-1">
                             {posts.length ? (
                                 posts.map((post: any) => (
-                                    <div key={post.postId} className="aspect-square overflow-hidden">
-                                        <img
-                                            src={`${api}/images/${post.images[0]}`}
-                                            className="w-full h-full object-cover"
-                                            alt="post"
-                                        />
+                                    <div key={post.postId} className="cursor-pointer aspect-square overflow-hidden"
+                                        onClick={() => {
+                                            setSelectedPost(post);
+                                            setPostOpen(true);
+                                        }}
+                                    >
+                                        {post.images[0].endsWith(".mp4") ? (
+                                            <video
+                                                src={`${api}/images/${post.images[0]}`}
+                                                className="w-full h-full object-cover"
+                                                muted
+                                                loop
+                                                playsInline
+                                                controls
+
+                                            />
+                                        ) : (
+                                            <img
+                                                src={`${api}/images/${post.images[0]}`}
+                                                alt="post"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        )}
                                     </div>
                                 ))
                             ) : (
@@ -155,6 +175,11 @@ export default function Page() {
                 open={followingsOpen}
                 onOpenChange={setFollowingsOpen}
                 userId={id}
+            />
+            <PostModal
+                open={postOpen}
+                onOpenChange={setPostOpen}
+                post={selectedPost}
             />
         </div>
     );
