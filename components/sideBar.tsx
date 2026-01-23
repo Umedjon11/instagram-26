@@ -11,6 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 import Image from "next/image"
 import ThemeToggler from "./theme-togler"
 import SearchMadal from "./searchMadal"
+import UploadPostModal from "./ui/hero-video-dialog"
 
 const SideBar = () => {
   const pathname = usePathname()
@@ -105,9 +106,9 @@ const SideBar = () => {
       </a>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-      <button  suppressHydrationWarning={true} className={`flex font-semibold ${pathname == "/messages" || openNotifitactions || openSearch ? "p-[1.4vh_1.7vh]" : "p-[1.4vh_20px]"} transition-all duration-300 rounded-md w-full mb-[1vh] hover:bg-[#F3F3F3] dark:hover:bg-[#25282C] gap-3 items-center`}>
+      <button  suppressHydrationWarning={true} className={`flex font-semibold ${pathname == "/messages" || openNotifitactions || openSearch ? "p-[1.4vh_1.7vh]" : "p-[1.4vh_20px]"} transition-all duration-300 rounded-md w-full mb-[3vh] hover:bg-[#F3F3F3] dark:hover:bg-[#25282C] gap-3 items-center`}>
         <svg aria-label="Settings" className="x1lliihq x1n2onr6 x5n08af" fill="currentColor" height="24" role="img" viewBox="0 0 24 24" width="24"><title>Else</title><line fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="3" x2="21" y1="4" y2="4"></line><line fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="3" x2="21" y1="12" y2="12"></line><line fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="3" x2="21" y1="20" y2="20"></line></svg>
-        <span className={openSearch || openNotifitactions || pathname == "/messages" ? "hidden" : ""}>Else</span>
+        <span className={openSearch || openNotifitactions || pathname == "/messages" ? "hidden" : ""}>More</span>
       </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="start">
@@ -152,6 +153,7 @@ const SideBar = () => {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    {openAdd && (<UploadPostModal />)}
     </div>
   )
 }
