@@ -5,11 +5,11 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { GetFolowings } from "@/reducers/apiProfile";
 import { clearFollowings } from "@/reducers/profile";
 import { AppDispatch, RootState } from "@/store/store";
+import Link from "next/link";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -19,9 +19,15 @@ type FollowingDialogProps = {
   userId: string;
 };
 
-export default function FollowingDialog({ open, onOpenChange, userId }: FollowingDialogProps) {
+export default function FollowingDialog({
+  open,
+  onOpenChange,
+  userId,
+}: FollowingDialogProps) {
   const dispatch = useDispatch<AppDispatch>();
-  const { folowings, isLoading, followingsLoaded } = useSelector((state: RootState) => state.counter);
+  const { folowings, isLoading, followingsLoaded } = useSelector(
+    (state: RootState) => state.counter
+  );
 
   useEffect(() => {
     if (open && userId && !followingsLoaded) {
@@ -35,29 +41,29 @@ export default function FollowingDialog({ open, onOpenChange, userId }: Followin
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Followings</DialogTitle>
-          <DialogDescription>
-            People you follow
-          </DialogDescription>
+      <DialogContent className="p-0 max-w-[420px]">
+        {/* HEADER */}
+        <DialogHeader className="px-4 py-3 border-b">
+          <DialogTitle className="text-center text-base font-semibold">
+            Following
+          </DialogTitle>
         </DialogHeader>
 
+        {/* BODY */}
         {isLoading ? (
-          <div className="py-10 text-center text-sm text-gray-500">
-            Loading followings...
+          <div className="h-[420px] flex items-center justify-center text-sm text-muted-foreground">
+            Loading...
           </div>
         ) : (
-          <div className="flex flex-col gap-3 mt-4">
-            <div className="flex flex-col gap-3 mt-4">
-              {folowings.length > 0 ? (
-                folowings.map((item: any) => {
-                  const user = item.userShortInfo;
+          <div className="h-[420px] overflow-y-auto">
+            {folowings.length > 0 ? (
+              folowings.map((item: any) => {
+                const user = item.userShortInfo;
 
-                  return (
+                return (
+                  <Link href={`/profile/info/${user.userId}`} key={user.userId}>
                     <div
-                      key={user.userId}
-                      className="flex items-center gap-3 border-b-1 pb-3"
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-muted transition cursor-pointer"
                     >
                       <img
                         src={
@@ -66,22 +72,26 @@ export default function FollowingDialog({ open, onOpenChange, userId }: Followin
                             : "/user.png"
                         }
                         alt={user.userName}
-                        className="w-10 h-10 rounded-full object-cover"
+                        className="w-11 h-11 rounded-full object-cover"
                       />
 
-                      <div className="flex flex-col text-sm">
-                        <span className="font-semibold">{user.userName}</span>
-                        <span className="text-gray-500">{user.fullname}</span>
+                      <div className="flex flex-col text-sm leading-tight">
+                        <span className="font-semibold">
+                          {user.userName}
+                        </span>
+                        <span className="text-muted-foreground">
+                          {user.fullname}
+                        </span>
                       </div>
                     </div>
-                  );
-                })) : (
-                <div className="text-center text-sm text-gray-500 py-6">
-                  No followings yet
-                </div>
-              )}
-            </div>
-
+                  </Link>
+                );
+              })
+            ) : (
+              <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
+                No followings yet
+              </div>
+            )}
           </div>
         )}
       </DialogContent>
