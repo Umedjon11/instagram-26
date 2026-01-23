@@ -32,7 +32,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import EmojiPicker from "emoji-picker-react";
-0;
+
 const Messages = () => {
   const dispatch = useDispatch() as any;
   const { chats, chatById, data } = useSelector((state: any) => state.getChats);
@@ -45,13 +45,19 @@ const Messages = () => {
     setShowEmojiPicker(false);
   };
 
+  const [message, setMessage] = useState("");
+  const currentUser = useSelector((state: any) => {
+    console.log("Проверяю state.user:", state.user);
+    console.log("Проверяю state.auth:", state.auth);
+    console.log("Проверяю state:", state);
+    return state.user || state.auth?.user || null;
+  });
+  const currentUserId = useSelector((state: any) => state.auth.user.id);
+
+  console.log("Мой ID:", currentUserId);
   const openChat = (chat: any) => {
     setActiveChat(chat);
-    dispatch(getChatById(chat.chatId)).then((res: any) => {
-      if (res.payload?.messages) {
-        setMessages(res.payload.messages);
-      }
-    });
+    dispatch(getChatById(chat.chatId)); // Просто диспатчим
   };
 
   const handleSendMessage = () => {
@@ -62,10 +68,9 @@ const Messages = () => {
         chatId: activeChat.chatId,
         message: message.trim(),
       }),
-    ).then((res: any) => {
-      if (res.payload) {
-        setMessages((prev: any) => [...prev, { ...res.payload, isMine: true }]);
-      }
+    ).then(() => {
+      // После отправки обновляем сообщения
+      dispatch(getChatById(activeChat.chatId));
     });
 
     setMessage("");
@@ -75,8 +80,6 @@ const Messages = () => {
     dispatch(getChats());
     dispatch(getUsers());
   }, [dispatch]);
-
-  const [message, setMessage] = useState("");
 
   const [openSendMessage, setOpenSendMessage] = useState<any>(false);
   const [openInfoPanel, setOpenInfoPanel] = useState(false);
@@ -92,6 +95,9 @@ const Messages = () => {
       }
     });
   };
+
+  const allState = useSelector((state: any) => state);
+  console.log("ВЕСЬ REDUX STATE:", allState);
 
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<any>(null);
@@ -244,7 +250,7 @@ const Messages = () => {
                   />
                   <div className="flex flex-col">
                     <h1>{e.sendUserName}</h1>
-                    <p className="text-[13px] text-[grey]"  >Active 4h ago</p>
+                    <p className="text-[13px] text-[grey]">Active 4h ago</p>
                   </div>
                 </div>
               ))}
@@ -313,7 +319,7 @@ const Messages = () => {
                 </div>
                 <div className="border-t w-[100%]"></div>
 
-                <div className="flex-1 overflow-x-auto flex flex-col justify-between h-[570px] p-2">
+                <div className="flex-1 overflow-x-auto flex flex-col justify-between h-[640px] p-2">
                   <div className="p-4 flex flex-col items-center gap-1">
                     <img
                       className="w-25 h-25 rounded-full"
@@ -332,65 +338,84 @@ const Messages = () => {
                       </button>
                     </Link>
                   </div>
-                  <div className="flex flex-col gap-1 w-full px-4 items-end">
-                    {chatById?.map((msg: any) => (
-                      <div
-                        key={msg.messageId}
-                        className={`group relative flex items-center gap-2 ${
-                          msg.isMine ? "ml-auto" : ""
-                        }`}
-                      >
-                        {!msg.isMine && (
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
-                            <button
-                              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
-                              onClick={() =>
-                                dispatch(deleteMessage(msg.messageId))
-                              }
-                              title="Удалить"
-                            >
-                              <DeleteIcon
-                                size={14}
-                                className="text-gray-500"
-                              />{" "}
-                            </button>
-                            <button
-                              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
-                              onClick={() =>
-                                navigator.clipboard.writeText(msg.messageText)
-                              }
-                              title="Копировать"
-                            >
-                              <SquarePen size={14} className="text-gray-500" />
-                            </button>
-                          </div>
-                        )}
+                  <div className="flex flex-col gap-1 w-full px-4">
+                    {chatById?.map((msg: any) => {
+                      console.log("Рендерим сообщение:", msg);
+                      // ВЫЧИСЛЯЕМ isMine ПРЯМО ЗДЕСЬ
+                      const isMine = msg.userId === currentUserId;
 
+                      console.log(
+                        `userId: ${msg.userId}, currentUserId: ${currentUserId}, isMine: ${isMine}`,
+                      );
+
+                      return (
                         <div
-                          className={`flex flex-col p-1 px-2 rounded-2xl max-w-[300px] break-words whitespace-pre-wrap ${
-                            msg.isMine
-                              ? "bg-blue-500 text-white"
-                              : "bg-blue-500 text-[white]"
+                          key={msg.messageId}
+                          className={`group relative flex items-center gap-2 ${
+                            isMine ? "justify-end" : "justify-start"
                           }`}
                         >
-                          {msg.messageText}
-                        </div>
+                          {/* Кнопки для ЧУЖИХ сообщений (слева) */}
+                          {!isMine && (
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
+                              <button
+                                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+                                onClick={() =>
+                                  dispatch(deleteMessage(msg.messageId))
+                                }
+                                title="Удалить"
+                              >
+                                <DeleteIcon
+                                  size={14}
+                                  className="text-gray-500"
+                                />
+                              </button>
+                              <button
+                                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+                                onClick={() =>
+                                  navigator.clipboard.writeText(msg.messageText)
+                                }
+                                title="Копировать"
+                              >
+                                <SquarePen
+                                  size={14}
+                                  className="text-gray-500"
+                                />
+                              </button>
+                            </div>
+                          )}
 
-                        {msg.isMine && (
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
-                            <button
-                              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
-                              onClick={() =>
-                                navigator.clipboard.writeText(msg.messageText)
-                              }
-                              title="Копировать"
-                            >
-                              <SquarePen size={14} className="text-gray-500" />
-                            </button>
+                          {/* Сообщение */}
+                          <div
+                            className={`flex flex-col p-1 px-2 rounded-2xl max-w-[300px] break-words whitespace-pre-wrap ${
+                              isMine
+                                ? "bg-blue-500 text-white" // ВАШИ сообщения - синие справа
+                                : "bg-gray-200 dark:bg-gray-700 text-black dark:text-white" // ЧУЖИЕ сообщения - серые слева
+                            }`}
+                          >
+                            {msg.messageText}
                           </div>
-                        )}
-                      </div>
-                    ))}
+
+                          {/* Кнопки для ВАШИХ сообщений (справа) */}
+                          {isMine && (
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
+                              <button
+                                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+                                onClick={() =>
+                                  navigator.clipboard.writeText(msg.messageText)
+                                }
+                                title="Копировать"
+                              >
+                                <SquarePen
+                                  size={14}
+                                  className="text-gray-500"
+                                />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -623,7 +648,11 @@ const Messages = () => {
                         </div>
 
                         <div>
-                          <input name="senf" type="radio" className="w-5 h-5 accent-blue-500" />
+                          <input
+                            name="senf"
+                            type="radio"
+                            className="w-5 h-5 accent-blue-500"
+                          />
                         </div>
                       </div>
                     );

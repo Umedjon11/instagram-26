@@ -68,12 +68,14 @@ export const sendChatMessage = createAsyncThunk(
       chatId,
       message,
       file,
+      currentUserId, 
     }: {
       chatId: number;
       message?: string;
       file?: File;
+      currentUserId: string;
     },
-    { dispatch },
+    { dispatch }
   ) => {
     try {
       const formData = new FormData();
@@ -87,14 +89,19 @@ export const sendChatMessage = createAsyncThunk(
         formData.append("File", file);
       }
 
-      await axiosRequest.put("/Chat/send-message", formData, {
+      const { data } = await axiosRequest.put("/Chat/send-message", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-
       dispatch(getChatById(chatId));
+      return {
+        ...data, 
+        userId: currentUserId, 
+        isMine: true,
+      };
     } catch (error) {
       isLogined(error);
       console.error(error);
+      throw error;
     }
   },
 );
