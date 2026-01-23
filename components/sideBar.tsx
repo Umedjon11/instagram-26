@@ -11,6 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 import Image from "next/image"
 import ThemeToggler from "./theme-togler"
 import SearchMadal from "./searchMadal"
+import UploadPostModal from "./ui/hero-video-dialog"
 
 const SideBar = () => {
   const pathname = usePathname()
@@ -152,6 +153,7 @@ const SideBar = () => {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    {openAdd && (<UploadPostModal />)}
     </div>
   )
 }
