@@ -7,6 +7,7 @@ import {
   deleteMessage,
   clearActiveChat,
   getUsers,
+  createChat,
 } from "@/reducers/mesage";
 import { Switch } from "antd";
 import { useRef } from "react";
@@ -46,18 +47,12 @@ const Messages = () => {
   };
 
   const [message, setMessage] = useState("");
-  const currentUser = useSelector((state: any) => {
-    console.log("Проверяю state.user:", state.user);
-    console.log("Проверяю state.auth:", state.auth);
-    console.log("Проверяю state:", state);
-    return state.user || state.auth?.user || null;
-  });
-  const currentUserId = useSelector((state: any) => state.auth.user.id);
+  const currentUserId = null;
 
   console.log("Мой ID:", currentUserId);
   const openChat = (chat: any) => {
     setActiveChat(chat);
-    dispatch(getChatById(chat.chatId)); // Просто диспатчим
+    dispatch(getChatById(chat.chatId));
   };
 
   const handleSendMessage = () => {
@@ -69,7 +64,6 @@ const Messages = () => {
         message: message.trim(),
       }),
     ).then(() => {
-      // После отправки обновляем сообщения
       dispatch(getChatById(activeChat.chatId));
     });
 
@@ -199,7 +193,19 @@ const Messages = () => {
     }
   };
 
+  const handleStartChat = (userId: string) => {
+    dispatch(createChat(userId))
+      .unwrap()
+      .then((res) => {
+        console.log("Чат создан:", res);
+      })
+      .catch((err) => {
+        console.error("Ошибка при создании чата:", err);
+      });
+  };
+
   const [search, setSearch] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   return (
     <>
@@ -208,10 +214,15 @@ const Messages = () => {
           <section className="flex flex-col gap-5 mt-4">
             <article className="flex items-center justify-between">
               <div className="flex items-center gap-1">
-                <h1 className="font-bold text-[20px]">ramziya</h1>
+                <h1 className="font-bold text-[20px]">
+                  {activeChat
+                    ? activeChat.sendUserName
+                    : activeChat?.sendUserName}
+                </h1>
+
                 <ChevronDown size={18} />
               </div>
-              <SquarePen />
+              <SquarePen onClick={() => setOpenSendMessage(true)} />
             </article>
 
             <article>
@@ -219,7 +230,7 @@ const Messages = () => {
                 <Search
                   color="grey"
                   width={18}
-                  className="absolute left-30 top-22 z-0 -translate-y-1/2"
+                  className="absolute left-35 top-22 z-0 -translate-y-1/2"
                 />
                 <input
                   type="text"
@@ -243,13 +254,15 @@ const Messages = () => {
                 >
                   <img
                     className="w-12 h-12 rounded-full object-cover"
-                    src={`https://instagram-api.softclub.tj/images/${
-                      e.sendUserImage
-                    }`}
+                    src={
+                      e.receiveUserImage
+                        ? `https://instagram-api.softclub.tj/images/${e.receiveUserImage}`
+                        : "https://th.bing.com/th/id/R.cf617bf1054e50f7321d18574d8192c8?rik=sAwHhwnmQRBgbA&pid=ImgRaw&r=0"
+                    }
                     alt=""
                   />
                   <div className="flex flex-col">
-                    <h1>{e.sendUserName}</h1>
+                    <h1>{e.receiveUserName}</h1>
                     <p className="text-[13px] text-[grey]">Active 4h ago</p>
                   </div>
                 </div>
@@ -287,15 +300,17 @@ const Messages = () => {
                   <div className="flex items-center gap-5">
                     <img
                       className="w-12 h-12 rounded-full"
-                      src={`https://instagram-api.softclub.tj/images/${
-                        activeChat.sendUserImage
-                      }`}
+                      src={
+                        activeChat.receiveUserImage
+                          ? `https://instagram-api.softclub.tj/images/${activeChat.receiveUserImage}`
+                          : "https://th.bing.com/th/id/R.cf617bf1054e50f7321d18574d8192c8?rik=sAwHhwnmQRBgbA&pid=ImgRaw&r=0"
+                      }
                       alt="error"
                     />
                     <div className="flex flex-col">
-                      <h1>{activeChat.sendUserName}</h1>
+                      <h1>{activeChat.receiveUserName}</h1>
                       <p className="text-[13px] text-[grey]">
-                        {activeChat.sendUserName}
+                        {activeChat.receiveUserName}
                       </p>
                     </div>
                   </div>
@@ -323,16 +338,18 @@ const Messages = () => {
                   <div className="p-4 flex flex-col items-center gap-1">
                     <img
                       className="w-25 h-25 rounded-full"
-                      src={`https://instagram-api.softclub.tj/images/${
-                        activeChat.sendUserImage || activeChat.receiveUserImage
-                      }`}
+                      src={
+                        activeChat.receiveUserImage
+                          ? `https://instagram-api.softclub.tj/images/${activeChat.receiveUserImage}`
+                          : "https://th.bing.com/th/id/R.cf617bf1054e50f7321d18574d8192c8?rik=sAwHhwnmQRBgbA&pid=ImgRaw&r=0"
+                      }
                       alt="error"
                     />
                     <h1 className="mt-2 font-medium text-lg">
-                      {activeChat.sendUserName}
+                      {activeChat.receiveUserName}
                     </h1>
                     <p className="text-[grey] text-[13px]">Instagram</p>
-                    <Link href={`/profile/${activeChat.id}`}>
+                    <Link href={`/profile/info/${activeChat.id}`}>
                       <button className="mt-2 bg-[#d9d9d965] font-medium p-1 rounded-[10px] w-30 hover:bg-[#d9d9d9b4] dark:bg-[#5f5c5c52]">
                         View profile
                       </button>
@@ -341,7 +358,7 @@ const Messages = () => {
                   <div className="flex flex-col gap-1 w-full px-4">
                     {chatById?.map((msg: any) => {
                       console.log("Рендерим сообщение:", msg);
-                      // ВЫЧИСЛЯЕМ isMine ПРЯМО ЗДЕСЬ
+
                       const isMine = msg.userId === currentUserId;
 
                       console.log(
@@ -355,7 +372,6 @@ const Messages = () => {
                             isMine ? "justify-end" : "justify-start"
                           }`}
                         >
-                          {/* Кнопки для ЧУЖИХ сообщений (слева) */}
                           {!isMine && (
                             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
                               <button
@@ -385,20 +401,40 @@ const Messages = () => {
                             </div>
                           )}
 
-                          {/* Сообщение */}
                           <div
                             className={`flex flex-col p-1 px-2 rounded-2xl max-w-[300px] break-words whitespace-pre-wrap ${
                               isMine
-                                ? "bg-blue-500 text-white" // ВАШИ сообщения - синие справа
-                                : "bg-gray-200 dark:bg-gray-700 text-black dark:text-white" // ЧУЖИЕ сообщения - серые слева
+                                ? "bg-blue-500 text-white"
+                                : "bg-gray-200 dark:bg-gray-700 text-black dark:text-white"
                             }`}
                           >
-                            {msg.messageText}
+                            {msg.messageText && <div>{msg.messageText}</div>}
+
+                            {msg.fileUrl &&
+                              msg.fileType.startsWith("image") && (
+                                <img
+                                  src={msg.fileUrl}
+                                  className="w-40 h-40 object-cover rounded"
+                                />
+                              )}
+
+                            {msg.fileUrl &&
+                              msg.fileType.startsWith("video") && (
+                                <video
+                                  src={msg.fileUrl}
+                                  controls
+                                  className="w-40 h-40 rounded"
+                                />
+                              )}
+
+                            {msg.fileUrl &&
+                              msg.fileType.startsWith("audio") && (
+                                <audio src={msg.fileUrl} controls />
+                              )}
                           </div>
 
-                          {/* Кнопки для ВАШИХ сообщений (справа) */}
                           {isMine && (
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
+                            <div className="opacity-0  group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
                               <button
                                 className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
                                 onClick={() =>
@@ -489,6 +525,11 @@ const Messages = () => {
                           onEmojiClick={handleEmojiClick}
                           width={300}
                           height={400}
+                          theme={
+                            document.documentElement.classList.contains("dark")
+                              ? "dark"
+                              : "light"
+                          }
                         />
                       </div>
                     )}
@@ -552,16 +593,17 @@ const Messages = () => {
                     <div className="flex items-center gap-2">
                       <img
                         className="w-15 h-15 rounded-full"
-                        src={`https://instagram-api.softclub.tj/images/${
-                          activeChat.receiveUserImage ||
-                          activeChat.sendUserImage
-                        }`}
+                        src={
+                          activeChat.receiveUserImage
+                            ? `https://instagram-api.softclub.tj/images/${activeChat.receiveUserImage}`
+                            : "https://th.bing.com/th/id/R.cf617bf1054e50f7321d18574d8192c8?rik=sAwHhwnmQRBgbA&pid=ImgRaw&r=0"
+                        }
                         alt="error"
                       />
                       <div className="flex flex-col items-start">
                         <h1>{activeChat.receiveUserName}</h1>
                         <p className="text-[13px] text-[grey]">
-                          {activeChat.sendUserName}
+                          {activeChat.receiveUserName}
                         </p>
                       </div>
                     </div>
@@ -634,11 +676,14 @@ const Messages = () => {
                         <div className="flex gap-2">
                           <img
                             className="w-12 h-12 rounded-full object-cover"
-                            src={`https://instagram-api.softclub.tj/images/${
-                              item.avatar || item.avatar
-                            }`}
-                            alt=""
+                            src={
+                              item.avatar
+                                ? `https://instagram-api.softclub.tj/images/${item.avatar}`
+                                : "https://th.bing.com/th/id/R.cf617bf1054e50f7321d18574d8192c8?rik=sAwHhwnmQRBgbA&pid=ImgRaw&r=0"
+                            }
+                            alt={item.userName || "avatar"}
                           />
+
                           <div className="flex flex-col items-start">
                             <h1>{item.userName}</h1>
                             <p className="text-[13px] text-[grey]">
@@ -649,14 +694,29 @@ const Messages = () => {
 
                         <div>
                           <input
-                            name="senf"
+                            name="send"
                             type="radio"
                             className="w-5 h-5 accent-blue-500"
+                            checked={selectedUserId === item.id}
+                            onChange={() => setSelectedUserId(item.id)}
                           />
                         </div>
                       </div>
                     );
                   })}
+                <button
+                  className="bg-blue-500  w-full text-[white] p-3 rounded hover:bg-blue-600"
+                  disabled={!selectedUserId}
+                  onClick={() => {
+                    if (selectedUserId) {
+                      handleStartChat(selectedUserId);
+                      setOpenSendMessage(false);
+                      setSelectedUserId(null);
+                    }
+                  }}
+                >
+                  Chat
+                </button>
               </div>
             </div>
           </div>
