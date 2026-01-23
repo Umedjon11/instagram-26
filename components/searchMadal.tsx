@@ -5,6 +5,7 @@ import { IHistory } from "@/reducers/search/search"
 import { RootState } from "@/store/store"
 import { X } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 
