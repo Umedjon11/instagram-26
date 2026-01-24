@@ -6,8 +6,11 @@ export const setToken = (token: string) => {
 }
 
 export const getToken = () => {
-    const token = localStorage.getItem("access_token")
-    return token
+    if (typeof window !== "undefined") {
+        const token = localStorage.getItem("access_token")
+        return token
+    }
+    return null
 }
 
 export const clearStorage = () => {
