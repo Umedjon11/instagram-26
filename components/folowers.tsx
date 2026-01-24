@@ -5,11 +5,11 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogDescription,
 } from "@/components/ui/dialog";
 import { GetFolowers } from "@/reducers/apiProfile";
 import { clearFollowers } from "@/reducers/profile";
 import { AppDispatch, RootState } from "@/store/store";
+import Link from "next/link";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -30,59 +30,61 @@ export default function FollowersDialog({
     );
 
     useEffect(() => {
-        if (open && userId && !followersLoaded) {
+        if (open && userId) {
             dispatch(GetFolowers(userId));
         }
 
         if (!open) {
             dispatch(clearFollowers());
         }
-    }, [open, userId, followersLoaded, dispatch]);
+    }, [open, userId, dispatch]);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Followers</DialogTitle>
-                    <DialogDescription>People who follow you</DialogDescription>
+            <DialogContent className="p-0 max-w-[420px]">
+                <DialogHeader className="px-4 py-3 border-b">
+                    <DialogTitle className="text-center text-base font-semibold">
+                        Followers
+                    </DialogTitle>
                 </DialogHeader>
-
                 {!followersLoaded ? (
-                    <div className="py-10 text-center text-sm text-gray-500">
-                        Loading followers...
+                    <div className="h-[420px] flex items-center justify-center text-sm text-muted-foreground">
+                        Loading...
                     </div>
                 ) : (
-                    <div className="flex flex-col gap-3 mt-4">
+                    <div className="h-[420px] overflow-y-auto">
                         {folowers.length > 0 ? (
                             folowers.map((item: any) => {
                                 const user = item.userShortInfo;
-
                                 return (
-                                    <div
-                                        key={user.userId}
-                                        className="flex items-center gap-3"
-                                    >
-                                        <img
-                                            src={
-                                                user.userPhoto
-                                                    ? `https://instagram-api.softclub.tj/images/${user.userPhoto}`
-                                                    : "/user.png"
-                                            }
-                                            alt={user.userName}
-                                            className="w-10 h-10 rounded-full object-cover"
-                                        />
+                                    <Link href={`/profile/info/${user.userId}`} key={user.userId}>
+                                        <div
+                                            className="flex items-center gap-3 px-4 py-3 hover:bg-muted transition cursor-pointer"
+                                        >
+                                            <img
+                                                src={
+                                                    user.userPhoto
+                                                        ? `https://instagram-api.softclub.tj/images/${user.userPhoto}`
+                                                        : "/user.png"
+                                                }
+                                                alt={user.userName}
+                                                className="w-11 h-11 rounded-full object-cover"
+                                            />
 
-                                        <div className="flex flex-col text-sm">
-                                            <span className="font-semibold">{user.userName}</span>
-                                            <span className="text-gray-500">
-                                                {user.fullname}
-                                            </span>
+                                            <div className="flex flex-col text-sm leading-tight">
+                                                <span className="font-semibold">
+                                                    {user.userName}
+                                                </span>
+                                                <span className="text-muted-foreground">
+                                                    {user.fullname}
+                                                </span>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </Link>
                                 );
                             })
                         ) : (
-                            <div className="text-center text-sm text-gray-500 py-6">
+                            <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
                                 No followers yet
                             </div>
                         )}

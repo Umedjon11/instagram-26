@@ -1,4 +1,5 @@
 import InstagramTextLogo from "@/components/instagramTextLogo"
+import InstagramLoading from './../components/InstagramLoading';
 const NotFound = () => {
 
     return (
