@@ -6,8 +6,11 @@ export const setToken = (token: string) => {
 }
 
 export const getToken = () => {
-    const token = localStorage.getItem("access_token")
-    return token
+    if (typeof window !== "undefined") {
+        const token = localStorage.getItem("access_token")
+        return token
+    }
+    return null
 }
 
 export const clearStorage = () => {
@@ -24,6 +27,8 @@ export const isLogined = (error: any) => {
 export const axiosRequest = axios.create({
     baseURL: "https://instagram-api.softclub.tj"
 })
+
+
 
 axiosRequest.interceptors.request.use(
     (config) => {

@@ -4,6 +4,10 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState, AppDispatch } from "../../store/store";
 import { getPosts, Postlike, Postkomment } from "../../reducers/home";
+import React, { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState, AppDispatch } from "../../store/store";
+import { getPosts } from "../../reducers/home";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
@@ -31,7 +35,6 @@ export default function PostCard() {
 
   const [openPostId, setOpenPostId] = useState<number | null>(null);
   const [commentText, setCommentText] = useState("");
-
   useEffect(() => {
     dispatch(getPosts());
   }, [dispatch]);
@@ -131,6 +134,11 @@ export default function PostCard() {
       {data && data.length > 0 && data.map((e: any) => (
         <div key={e.postId} className="mb-6">
 
+  return (
+    <div className="w-[630px] flex flex-col gap-2 mx-auto">
+      {data?.map((e: any) => (
+        <div key={e.postId}>
+
           <header className="flex items-center justify-between h-[56px]">
             <div className="flex items-center gap-3">
               <img
@@ -138,6 +146,7 @@ export default function PostCard() {
                   e.userImage
                     ? `https://instagram-api.softclub.tj/images/${e.userImage}`
                     : "/userImage.png"
+                    : "/homePage.jpg"
                 }
                 className="w-8 h-8 rounded-full object-cover"
                 alt="avatar"
@@ -147,6 +156,9 @@ export default function PostCard() {
                   {e.userName}
                 </span>
                 <span className="text-sm text-gray-500">{e.title}</span>
+                <span>
+                  {e.title}
+                </span>
               </div>
             </div>
 
@@ -241,6 +253,72 @@ export default function PostCard() {
           <div className="flex gap-2 mt-2">
             <span className="font-semibold">{e.userName}</span>
             <span>{e.content}</span>
+          </div>
+
+
+              <DialogContent className="w-[300px] bg-gray-800 text-white rounded-2xl p-2 shadow-lg">
+                <div className="flex flex-col gap-1">
+                  <button className="w-full py-3 px-4 text-left font-semibold rounded-lg hover:bg-gray-700 transition">
+                    Complain
+                  </button>
+                  <button className="w-full py-3 px-4 text-left rounded-lg hover:bg-gray-700 transition">
+                    Share
+                  </button>
+                  <button className="w-full py-3 px-4 text-left rounded-lg hover:bg-gray-700 transition">
+                    Copy Link
+                  </button>
+                  <button className="w-full py-3 px-4 text-left rounded-lg hover:bg-gray-700 transition">
+                    Save
+                  </button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </header>
+
+          {e.images.length === 1 ? (
+            <img
+              src={`https://instagram-api.softclub.tj/images/${e.images[0]}`}
+              className="w-full aspect-square object-cover rounded-md"
+              alt="post"
+            />
+          ) : (
+            <Swiper
+              pagination={{ clickable: true }}
+              modules={[Pagination]}
+              className="w-full aspect-square rounded-md"
+            >
+              {e.images.map((image: string, index: number) => (
+                <SwiperSlide key={index}>
+                  <img
+                    src={`https://instagram-api.softclub.tj/images/${image}`}
+                    className="w-full h-full object-cover"
+                    alt="post"
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          )}
+
+          <div className="flex justify-between pt-4">
+            <div className="flex gap-4">
+              <div className="flex items-center gap-[6px]">
+                <Heart className="cursor-pointer hover:scale-110 transition" />
+                <h1 className="text-[16px] font-[500]">{e.postLikeCount}</h1>
+              </div>
+              <div className="flex items-center gap-[6px]">
+                <MessageCircle className="cursor-pointer hover:scale-110 transition" />
+                <h1 className="text-[16px] font-[500]">{e.commentCount}</h1>
+              </div>
+              <SendHorizontal className="cursor-pointer hover:scale-110 transition" />
+            </div>
+            <Bookmark className="cursor-pointer hover:scale-110 transition" />
+          </div>
+
+          <div className="flex gap-2 text-[16px] mt-[10px] items-center">
+            <span className="font-semibold text-[18px]">
+              {e.userName}
+            </span>
+            <span className="font-medium text-[16px]">{e.content}</span>
           </div>
 
           <div className="border-b border-gray-200 mt-4"></div>
