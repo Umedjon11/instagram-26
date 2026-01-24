@@ -97,8 +97,6 @@ const homeSlice = createSlice({
       })
 
       .addCase(getPosts.fulfilled,
-      .addCase(
-        getPosts.fulfilled,
         (state, action: PayloadAction<Post[]>) => {
           state.loading = false;
           state.data = action.payload;
@@ -132,10 +130,6 @@ const homeSlice = createSlice({
           state.data = action.payload;
         }
       )
-      .addCase(getPosts.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      });
   },
 });
 
