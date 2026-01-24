@@ -1,11 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
+  FollowUser,
   GetById,
   GetFolowers,
   GetFolowings,
   GetInfoById,
   GetPosts,
+  GetPostsFavorite,
   GetProfile,
+  UnFollow,
   UpdateUserProfile,
 } from "./apiProfile";
 
@@ -39,6 +42,10 @@ export interface CounterState {
     lastName: string;
     about: string;
   } | null;
+  mySubscriptions: { id: string | number }[];
+  followLoading: boolean;
+  postsFavorite: [];
+  favoriteLoaded: boolean;
 }
 
 const initialState: CounterState = {
@@ -64,6 +71,10 @@ const initialState: CounterState = {
   folowings: [],
   followingsLoaded: false,
   dataById: null,
+  mySubscriptions: [],
+  followLoading: false,
+  postsFavorite: [],
+  favoriteLoaded: false,
 };
 
 export const counterSlice = createSlice({
@@ -115,12 +126,10 @@ export const counterSlice = createSlice({
     builder.addCase(GetFolowings.pending, (state) => {
       state.followingsLoaded = true;
     });
-
     builder.addCase(GetFolowings.fulfilled, (state, action) => {
       state.folowings = action.payload;
       state.followingsLoaded = true;
     });
-
     builder.addCase(GetFolowings.rejected, (state) => {
       state.followingsLoaded = false;
     });
@@ -156,6 +165,31 @@ export const counterSlice = createSlice({
       .addCase(GetInfoById.rejected, (state) => {
         state.isLoading = false;
       });
+    builder
+      .addCase(FollowUser.pending, (state) => {
+        state.followLoading = true;
+      })
+      .addCase(FollowUser.fulfilled, (state) => {
+        state.followLoading = false;
+      })
+      .addCase(UnFollow.pending, (state) => {
+        state.followLoading = true;
+      })
+      .addCase(UnFollow.fulfilled, (state) => {
+        state.followLoading = false;
+      });
+    builder.addCase(GetPostsFavorite.pending, (state) => {
+      state.favoriteLoaded = false;
+    });
+
+    builder.addCase(GetPostsFavorite.fulfilled, (state, action) => {
+      state.postsFavorite = action.payload;
+      state.favoriteLoaded = true;
+    });
+
+    builder.addCase(GetPostsFavorite.rejected, (state) => {
+      state.favoriteLoaded = false;
+    });
   },
 });
 

@@ -1,11 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { Grid3x3, Bookmark, Contact } from "lucide-react";
+import { Grid3x3, Contact } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { GetInfoById, GetPosts } from "@/reducers/apiProfile";
+import { FollowUser, GetFolowings, GetInfoById, GetPosts, UnFollow } from "@/reducers/apiProfile";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import FollowersDialog from "@/components/folowers";
@@ -23,17 +23,38 @@ export default function Page() {
     const [activeTab, setActiveTab] =
         useState<"Posts" | "Saved" | "Tagged">("Posts");
 
-    const { dataById, posts } = useSelector(
+    const { dataById, posts, mySubscriptions, followLoading } = useSelector(
         (state: RootState) => state.counter
     );
+
+    const isFollowing = mySubscriptions.some(
+        (user: any) => String(user.id) === String(id)
+    );
+
+    const handleFollow = () => {
+        if (!id) return;
+
+        if (isFollowing) {
+            dispatch(UnFollow(id as string)).then(() => {
+                dispatch(GetFolowings(id as string));
+            });
+        } else {
+            dispatch(FollowUser(id as string)).then(() => {
+                dispatch(GetFolowings(id as string));
+            });
+        }
+    };
 
     const api = "https://instagram-api.softclub.tj";
 
     useEffect(() => {
         if (!id) return;
+
         dispatch(GetInfoById(id as string));
         dispatch(GetPosts(id as string));
+        dispatch(GetFolowings(id as string));
     }, [dispatch, id]);
+
 
     if (!dataById) return <div className="p-10">Loading...</div>;
 
@@ -61,8 +82,14 @@ export default function Page() {
                 <div className="flex flex-col gap-5">
                     <div className="flex items-center gap-6">
                         <span className="text-xl">{dataById.userName}</span>
-                        <button className="px-4 py-1.5 rounded-lg border text-sm">
-                            Follow
+                        <button
+                            onClick={handleFollow}
+                            disabled={followLoading}
+                            className={`px-4 py-1.5 rounded-lg text-sm transition
+                            ${isFollowing ? "border bg-gray-200 text-black"
+                                    : "bg-blue-500 text-white"} 
+                            ${followLoading ? "opacity-50 cursor-not-allowed" : ""}`}>
+                            {isFollowing ? "Unfollow" : "Follow"}
                         </button>
                         <button className="px-4 py-1.5 rounded-lg border text-sm">
                             Message
