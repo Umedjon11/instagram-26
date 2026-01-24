@@ -33,9 +33,7 @@ const Reels = () => {
   }, [dispatch])
 
   const handleToggleFollow = async (userId: string, isFollowing?: boolean) => {
-
     const isCurrentlyFollowing = isFollowing ?? followedUsers.has(userId);
-
     if (!userId) {
       return;
     }
@@ -194,7 +192,8 @@ const Reels = () => {
                     size={22}
                     className={elem.postFavorite ? "fill-white text-white" : "text-white"}
                   />
-                </button>                <button type="button" aria-label="Like post" className="p-1.5 opacity-80"><MoreHorizontal size={22} /></button>
+                </button>
+                <button type="button" aria-label="Like post" className="p-1.5 opacity-80"><MoreHorizontal size={22} /></button>
               </div>
             </div>
           ))}
