@@ -12,13 +12,8 @@ export default function Home() {
 
         <div className="flex gap-4 overflow-x-auto pb-4 border-b border-gray-200">
           <InstaStoriesCard />
-          <InstaStoriesCard />
-          <InstaStoriesCard />
-          <InstaStoriesCard />
-          <InstaStoriesCard />
         </div>
 
-        <PostCard />
         <PostCard />
       </div>
       

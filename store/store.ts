@@ -1,5 +1,6 @@
-import postsReducer from "@/reducers/interesting";
-import reelsReducer from "@/reducers/reels";
+import  homeSlice  from '@/reducers/home';
+import postsReducer from '@/reducers/interesting';
+import reelsReducer from '@/reducers/reels';
 import { chatsSlice } from "@/reducers/mesage";
 import counterSlice from "@/reducers/profile";
 import { configureStore } from "@reduxjs/toolkit";
@@ -11,6 +12,7 @@ export const store = configureStore({
     counter: counterSlice,
     reels: reelsReducer,
     search: searchSlice,
+    home: homeSlice,
     posts: postsReducer,
   },
 });
