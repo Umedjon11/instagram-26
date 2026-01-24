@@ -21,7 +21,7 @@ const SearchMadal = ({ isOpen }: { isOpen: boolean }) => {
         }
     }, [isOpen, search])
     return ( 
-        <div className={`${isOpen ? "flex w-[29%] rounded-r-2xl fixed bg-white dark:bg-black" : "hidden w-[0%]"} ml-16.5 border-r h-screen flex-col gap-[2vh] items-start overflow-x-hidden overflow-y-auto transition-all duration-300 p-[5vh_0]`}>
+        <div className={`${isOpen ? "flex w-[29%] rounded-r-2xl fixed bg-white dark:bg-black" : "hidden w-[0%]"} ml-16 border-r h-screen flex-col gap-[2vh] items-start overflow-x-hidden overflow-y-auto transition-all duration-300 p-[5vh_0]`}>
             <p className="text-3xl pl-[4%] mb-[2vh] font-semibold">Search Request</p>
             <input value={search} onChange={(e) => setSearch(e.target.value)} className="p-[1vh_20px] rounded-full bg-[#F3F5F7] dark:bg-[#25292E] w-[92%] m-[0_auto] outline-0" placeholder="Search" type="search" />
             <div className="flex justify-between w-[90%] m-[0_auto] items-center">

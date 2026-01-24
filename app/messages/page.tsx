@@ -4,12 +4,14 @@ import {
   getChatById,
   deleteChatById,
   sendChatMessage,
+  deleteMessage,
 } from "@/reducers/mesage";
 import { Switch } from "antd";
 
 import {
   Bell,
   ChevronDown,
+  Delete,
   Image,
   Info,
   Mic,
@@ -81,7 +83,7 @@ const Messages = () => {
             </article>
 
             <article>
-              <div className="relative p-[6px] bg-[#ebebeb6f] rounded-2xl">
+              <div className="relative p-[6px] bg-[#ebebeb6f] rounded-2xl dark:bg-[#504f4f42]">
                 <Search
                   color="grey"
                   width={18}
@@ -105,7 +107,7 @@ const Messages = () => {
                 <div
                   key={e.id}
                   onClick={() => openChat(e)}
-                  className="flex items-start gap-3 p-2 rounded-[7px] cursor-pointer hover:bg-[#e6e4e466]"
+                  className="flex items-start gap-3 p-2 rounded-[7px] cursor-pointer hover:bg-[#e6e4e466] dark:hover:bg-[#5a595935]"
                 >
                   <img
                     className="w-12 h-12 rounded-full object-cover"
@@ -125,16 +127,15 @@ const Messages = () => {
         </section>
         <section className="w-full border-l h-auto">
           {!activeChat ? (
-            <div className="text-gray-400 text-center mt-20 h-120 gap-5 justify-center flex flex-col items-center">
-              <div className="border border-[2px] border-[black] rounded-[100%] w-30 h-30 flex items-center justify-center">
+            <div className="text-center mt-20 h-120 gap-5 justify-center flex flex-col items-center">
+              <div className="border border-[2px] border-[black] dark:border-[white] rounded-[100%] w-30 h-30 flex items-center justify-center">
                 <Send
                   strokeWidth={0.5}
-                  color="black"
                   size={60}
                   className="relative top-1 right-1"
                 />
               </div>
-              <h1 className="text-[black] text-[25px] font-medium">
+              <h1 className="text-[black] text-[25px] font-medium dark:text-[white]">
                 Your messages
               </h1>
               <span className="text-center">
@@ -200,7 +201,7 @@ const Messages = () => {
                     </h1>
                     <p className="text-[grey] text-[13px]">Instagram</p>
                     <Link href={`/profile/${activeChat.id}`}>
-                      <button className="mt-2 bg-[#d9d9d965] font-medium p-1 rounded-[10px] w-30 hover:bg-[#d9d9d9b4]">
+                      <button className="mt-2 bg-[#d9d9d965] font-medium p-1 rounded-[10px] w-30 hover:bg-[#d9d9d9b4] dark:bg-[#5f5c5c52]">
                         View profile
                       </button>
                     </Link>
@@ -209,13 +210,14 @@ const Messages = () => {
                     {chatById?.map((msg: any) => (
                       <div
                         key={msg.id}
-                        className={`p-2 m-auto  rounded-2xl hover:${<Send/>} ${
+                        className={`p-2 m-auto  rounded-2xl} ${
                           msg.isMine
                             ? "ml-auto bg-blue-500 text-white"
                             : "bg-gray-200"
                         }`}
                       >
                         {msg.messageText}
+                        <Delete onClick={() => dispatch(deleteMessage(msg.messageId))} />
                       </div>
                     ))}
                   </div>

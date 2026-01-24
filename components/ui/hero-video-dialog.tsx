@@ -121,55 +121,59 @@ export default function UploadPostModal() {
                 />
               </div>
               {nextt === 1 && (
-                <div className="w-64 border-l border-white/10 p-3 space-y-2">
+                <div className="w-80 border-l border-white/10 p-3 space-y-2">
                   <p className="mb-2 font-semibold">Filters</p>
-
-                  <div
-                    onClick={() => setFilter("none")}
-                    className="w-full rounded px-2 py-1 hover:bg-white/10"
-                  >
-                    <Image src={imgFilter1} alt='original image'/>
-                    <button>
-                      Original
-                    </button>
+                  <div className='flex gap-5'>
+                    <div
+                      onClick={() => setFilter("none")}
+                      className="w-full rounded px-2 py-1 hover:bg-white/10"
+                    >
+                      <Image src={imgFilter1} alt='original image' />
+                      <button className='w-full py-2'>
+                        Original
+                      </button>
+                    </div>
+                    <div
+                      onClick={() =>
+                        setFilter(
+                          "brightness(1.1) contrast(1.2) saturate(1.1)"
+                        )
+                      }
+                      className="w-full rounded px-2 py-1 hover:bg-white/10"
+                    >
+                      <Image src={imgFilter1} alt='original image' />
+                      <button className='w-full py-2'>
+                        Clarendon
+                      </button>
+                    </div>
                   </div>
-
-                  <div
-                    onClick={() =>
-                      setFilter(
-                        "brightness(1.1) contrast(1.2) saturate(1.1)"
-                      )
-                    }
-                    className="w-full rounded px-2 py-1 hover:bg-white/10"
-                  >
-                    <button>
-                      Clarendon
-                    </button>
-                  </div>
-                  <div
-                    onClick={() =>
-                      setFilter(
-                        "brightness(1.1) contrast(1.15) saturate(1.15) hue-rotate(-5deg)"
-                      )
-                    }
-                    className="w-full rounded px-2 py-1 hover:bg-white/10"
-                  >
-                    <button>
-                      Lark
-                    </button>
-                  </div>
-
-                  <div
-                    onClick={() =>
-                      setFilter(
-                        "contrast(1.3) saturate(0.8) grayscale(1)"
-                      )
-                    }
-                    className="w-full rounded px-2 py-1 hover:bg-white/10"
-                  >
-                    <button>
-                      Moon
-                    </button>
+                  <div className='flex gap-5'>
+                    <div
+                      onClick={() =>
+                        setFilter(
+                          "brightness(1.1) contrast(1.15) saturate(1.15) hue-rotate(-5deg)"
+                        )
+                      }
+                      className="w-full rounded px-2 py-1 hover:bg-white/10"
+                    >
+                      <Image src={imgFilter1} alt='original image' />
+                      <button className='w-full py-2'>
+                        Lark
+                      </button>
+                    </div>
+                    <div
+                      onClick={() =>
+                        setFilter(
+                          "contrast(1.3) saturate(0.8) grayscale(1)"
+                        )
+                      }
+                      className="w-full rounded px-2 py-1 hover:bg-white/10"
+                    >
+                      <Image src={imgFilter1} alt='original image' />
+                      <button className='w-full py-2'>
+                        Moon
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}

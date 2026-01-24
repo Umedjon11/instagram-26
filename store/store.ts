@@ -12,7 +12,7 @@ export const store = configureStore({
     counter: counterSlice,
     reels: reelsReducer,
     search: searchSlice,
-    home: homeSlice
+    home: homeSlice,
     search: searchSlice,
     posts: postsReducer,
   },
