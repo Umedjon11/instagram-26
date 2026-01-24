@@ -86,7 +86,7 @@ export default function UploadPostModal() {
     fd.append("Content", caption2)
     try {
       await axiosRequest.post("/Post/add-post", fd)
-      router.push("/profile")
+      window.location.reload()
     } catch (error) {
       console.error(error);
     }
