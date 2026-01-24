@@ -13,6 +13,7 @@ export const store = configureStore({
     reels: reelsReducer,
     search: searchSlice,
     home: homeSlice,
+    search: searchSlice,
     posts: postsReducer,
   },
 });

@@ -1,14 +1,14 @@
 "use client";
 
 import Stories from "react-insta-stories";
-import { stories } from "../../app/data/stories";
 import { X } from "lucide-react";
 
 type Props = {
   onClose: () => void;
+  stories: any[];
 };
 
-export default function StoriesModal({ onClose }: Props) {
+export default function StoriesModal({ onClose, stories }: Props) {
   return (
     <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
       <button

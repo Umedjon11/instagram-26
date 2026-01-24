@@ -3,6 +3,10 @@ import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { getReels, Postkomment, Postlike, followUser, unfollowUser, Save } from '@/reducers/reels'
 import { RootState, AppDispatch } from '@/store/store'
+import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Music2 } from 'lucide-react'
+
+interface Comment {
+  postCommentId: number;
 import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Music2, X, Smile } from 'lucide-react'
 import Link from 'next/link'
 
@@ -23,6 +27,10 @@ interface ReelElement {
 
 const Reels = () => {
   const dispatch = useDispatch<AppDispatch>()
+
+  const { data } = useSelector((state: RootState) => state.reels)
+  const [ openPostId, setOpenPostId] = useState<number | null>(null)
+  const [commentText, setCommentText] = useState("")
   const { data } = useSelector((state: RootState) => state.reels) as { data: ReelElement[] }
   const [openPostId, setOpenPostId] = useState<number | null>(null)
   const [commentText, setCommentText] = useState<string>("")
