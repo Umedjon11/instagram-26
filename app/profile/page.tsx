@@ -2,7 +2,7 @@
 
 import FollowersDialog from "@/components/folowers";
 import FollowingDialog from "@/components/folowing";
-import { GetPosts, GetProfile } from "@/reducers/apiProfile";
+import { GetPosts, GetPostsFavorite, GetProfile } from "@/reducers/apiProfile";
 import { AppDispatch, RootState } from "@/store/store";
 import { jwtDecode } from "jwt-decode";
 import { Bookmark, Contact, Grid3x3 } from "lucide-react";
@@ -12,16 +12,18 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getToken } from "@/utils/axios";
 import InstagramLoading from "@/components/InstagramLoading";
+import ProfilePost from "@/components/ProfilePost";
 
 export default function Page() {
   const dispatch = useDispatch<AppDispatch>();
-  const { data, posts } = useSelector((state: RootState) => state.counter);
+  const { data, posts, postsFavorite, favoriteLoaded } = useSelector((state: RootState) => state.counter);
   const api = 'https://instagram-api.softclub.tj'
   const postsRef = useRef<HTMLDivElement | null>(null);
   const [followersOpen, setFollowersOpen] = useState(false);
   const [followingsOpen, setFollowingsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-
+  const [postProfileOpen, setPostProfileOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<any>(null);
 
   const scrollToPosts = () => {
     postsRef.current?.scrollIntoView({
@@ -55,11 +57,9 @@ export default function Page() {
     }
   }, [data, posts]);
 
-
   if (loading) {
     return <InstagramLoading />;
   }
-
 
   return (
     <div className="w-[82%] ml-auto min-h-screen px-10 py-8">
@@ -138,6 +138,7 @@ export default function Page() {
           </button>
           <button onClick={() => {
             setActiveTab("Saved");
+            dispatch(GetPostsFavorite());
           }} className={`cursor-pointer flex items-center gap-1 pt-2 ${activeTab === "Saved"
             ? "text-blue-500 font-semibold border-t border-blue-500"
             : "text-gray-800"
@@ -161,12 +162,26 @@ export default function Page() {
             <div className="grid grid-cols-3 gap-1">
               {posts.length > 0 ? (
                 posts.map((post: any) => (
-                  <div key={post.postId} className="aspect-square overflow-hidden">
-                    <img
-                      src={`${api}/images/${post.images[0]}`}
-                      alt="post"
-                      className="w-full h-full object-cover"
-                    />
+                  <div key={post.postId} className="cursor-pointer aspect-square overflow-hidden bg-black"
+                    onClick={() => {
+                      setSelectedPost(post);
+                      setPostProfileOpen(true);
+                    }}
+                  >
+                    {post.images[0].endsWith(".mp4") ? (
+                      <video
+                        src={`${api}/images/${post.images[0]}`}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        muted
+                        playsInline
+                      />
+                    ) : (
+                      <img
+                        src={`${api}/images/${post.images[0]}`}
+                        alt="post"
+                        className="w-full h-full object-cover"
+                      />
+                    )}
                   </div>
                 ))
               ) : (
@@ -183,13 +198,43 @@ export default function Page() {
           )}
 
           {activeTab === "Saved" && (
-            <div className="col-span-3 flex flex-col items-center justify-center h-96 gap-4">
-              <Image src="/image 78.png" alt="camera" width={100} height={100} />
-              <span className="text-lg font-semibold">You saves</span>
-              <span className="text-sm opacity-70">Only you can see what youve saved</span>
-              <Link href="/reels" className="text-[#3B82F6] font-semibold">
-                + New collection
-              </Link>
+            <div className="grid grid-cols-3 gap-1">
+              {postsFavorite.length > 0 ? (
+                postsFavorite.map((post: any) => (
+                  <div
+                    key={post.postId}
+                    className="cursor-pointer aspect-square overflow-hidden bg-black"
+                    onClick={() => {
+                      setSelectedPost(post);
+                      setPostProfileOpen(true);
+                    }}
+                  >
+                    {post.images[0].endsWith(".mp4") ? (
+                      <video
+                        src={`${api}/images/${post.images[0]}`}
+                        className="w-full h-full object-cover"
+                        muted
+                        playsInline
+                      />
+                    ) : (
+                      <img
+                        src={`${api}/images/${post.images[0]}`}
+                        alt="post"
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-3 flex flex-col items-center justify-center h-96 gap-4">
+                  <Image src="/image 78.png" alt="camera" width={100} height={100} />
+                  <span className="text-lg font-semibold">You saves</span>
+                  <span className="text-sm opacity-70">Only you can see what youve saved</span>
+                  <Link href="/reels" className="text-[#3B82F6] font-semibold">
+                    + New collection
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 
@@ -212,6 +257,11 @@ export default function Page() {
         open={followingsOpen}
         onOpenChange={setFollowingsOpen}
         userId={userId}
+      />
+      <ProfilePost
+        open={postProfileOpen}
+        onOpenChange={setPostProfileOpen}
+        post={selectedPost}
       />
     </div>
   );

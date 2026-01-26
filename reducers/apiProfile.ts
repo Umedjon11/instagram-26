@@ -93,7 +93,7 @@ export const UpdateUserImage = createAsyncThunk(
   async (file: File, { rejectWithValue }) => {
     try {
       const formData = new FormData();
-      formData.append("Image", file);
+      formData.append("imageFile", file);
 
       const { data } = await axiosRequest.put(
         "/UserProfile/update-user-image-profile",
@@ -107,11 +107,64 @@ export const UpdateUserImage = createAsyncThunk(
   },
 );
 
-export const GetInfoById = createAsyncThunk("profile/GetInfoById", async (userId: string) => {
-  try {
-    const { data } = await axiosRequest.get(`/UserProfile/get-user-profile-by-id?id=${userId}`);
+export const GetInfoById = createAsyncThunk(
+  "profile/GetInfoById",
+  async (userId: string) => {
+    try {
+      const { data } = await axiosRequest.get(
+        `/UserProfile/get-user-profile-by-id?id=${userId}`,
+      );
+      return data.data;
+    } catch (error) {
+      console.error(error);
+    }
+  },
+);
+
+export const FollowUser = createAsyncThunk(
+  "profile/FollowUser",
+  async (userId: string) => {
+    try {
+      const { data } = await axiosRequest.post(
+        `/FollowingRelationShip/add-following-relation-ship?followingUserId=${userId}`,
+      );
+      return data.data;
+    } catch (error) {
+      console.error(error);
+    }
+  },
+);
+
+export const UnFollow = createAsyncThunk(
+  "profile/UnFollow",
+  async (userId: string) => {
+    const { data } = await axiosRequest.delete(
+      `/FollowingRelationShip/delete-following-relation-ship?followingUserId=${userId}`,
+    );
     return data.data;
-  } catch (error) {
-    console.error(error);
-  }
-});
+  },
+);
+
+export const DeletePost = createAsyncThunk(
+  "profile/UnFollow",
+  async (userId: string) => {
+    const { data } = await axiosRequest.delete(
+      `/Post/delete-post?id=${userId}`,
+    );
+    return data.data;
+  },
+);
+
+export const GetPostsFavorite = createAsyncThunk(
+  "profile/GetPostsFavorite",
+  async () => {
+    try {
+      const { data } = await axiosRequest.get(
+        "/UserProfile/get-post-favorites",
+      );
+      return data.data;
+    } catch (error) {
+      console.error(error);
+    }
+  },
+);

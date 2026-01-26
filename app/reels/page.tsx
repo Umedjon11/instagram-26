@@ -1,12 +1,13 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { getReels, Postkomment, Postlike, followUser, unfollowUser } from '@/reducers/reels'
+import { getReels, Postkomment, Postlike, followUser, unfollowUser, Save } from '@/reducers/reels'
 import { RootState, AppDispatch } from '@/store/store'
-import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Music2, X, Smile } from 'lucide-react'
-import { Button } from 'antd'
-import Link from 'next/link'
+import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Music2, Smile, Link, X } from 'lucide-react'
 
+interface Comment {
+  postCommentId: number;
+}
 interface ReelElement {
   postId: number;
   userId: string;
@@ -19,13 +20,15 @@ interface ReelElement {
   commentCount: number;
   comments: any[];
   isFollowing?: boolean;
+  postFavorite: boolean;
 }
 
 const Reels = () => {
   const dispatch = useDispatch<AppDispatch>()
-  const { data } = useSelector((state: RootState) => state.reels) as { data: ReelElement[] }
+
+  const { data } = useSelector((state: RootState) => state.reels)
   const [openPostId, setOpenPostId] = useState<number | null>(null)
-  const [commentText, setCommentText] = useState<string>("")
+  const [commentText, setCommentText] = useState("")
   const [followedUsers, setFollowedUsers] = useState<Set<string>>(new Set())
 
   useEffect(() => {
@@ -33,9 +36,7 @@ const Reels = () => {
   }, [dispatch])
 
   const handleToggleFollow = async (userId: string, isFollowing?: boolean) => {
-
     const isCurrentlyFollowing = isFollowing ?? followedUsers.has(userId);
-
     if (!userId) {
       return;
     }
@@ -133,9 +134,9 @@ const Reels = () => {
               <div className="absolute bottom-4 left-4 right-12 text-white z-10">
                 <div className="flex items-center gap-2 mb-2">
                   <Link
-                    href={`/profile/info/${elem.userId}`}   
+                    href={`/profile/info/${elem.userId}`}
                     className="flex items-center gap-2 hover:opacity-80 transition"
-                    aria-label={`View ${elem.userName}'s profile`}  
+                    aria-label={`View ${elem.userName}'s profile`}
                   >
                     <div className="w-7 h-7 rounded-full overflow-hidden border border-zinc-500">
                       <img
@@ -143,7 +144,7 @@ const Reels = () => {
                           ? `https://instagram-api.softclub.tj/images/${elem.userImage}`
                           : "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
                         className="w-full h-full object-cover"
-                        alt={`${elem.userName}'s profile picture`}   
+                        alt={`${elem.userName}'s profile picture`}
                       />
                     </div>
                     <span className="font-semibold text-xs">{elem.userName}</span>
@@ -154,8 +155,8 @@ const Reels = () => {
                     type="button"
                     onClick={() => handleToggleFollow(elem.userId, elem.isFollowing)}
                     className={`text-[11px] font-bold px-3 py-0.5 rounded active:scale-95 transition border ${(elem.isFollowing ?? followedUsers.has(elem.userId))
-                        ? "bg-transparent border-white/40 text-white"
-                        : "bg-white text-black border-white hover:bg-zinc-200"
+                      ? "bg-transparent border-white/40 text-white"
+                      : "bg-white text-black border-white hover:bg-zinc-200"
                       }`}
                   >
                     {(elem.isFollowing ?? followedUsers.has(elem.userId)) ? "Following" : "Follow"}
@@ -185,7 +186,16 @@ const Reels = () => {
                 </div>
 
                 <button type="button" aria-label="Like post" className="p-1.5 hover:scale-110 transition"><Send size={22} /></button>
-                <button type="button" aria-label="Like post" className="p-1.5 hover:scale-110 transition"><Bookmark size={22} /></button>
+                <button
+                  type="button" aria-label='save'
+                  onClick={() => dispatch(Save(elem.postId))}
+                  className="p-1.5 hover:scale-110 transition"
+                >
+                  <Bookmark
+                    size={22}
+                    className={elem.postFavorite ? "fill-white text-white" : "text-white"}
+                  />
+                </button>
                 <button type="button" aria-label="Like post" className="p-1.5 opacity-80"><MoreHorizontal size={22} /></button>
               </div>
             </div>
@@ -202,7 +212,7 @@ const Reels = () => {
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-5 scrollbar-hide">
-          {currentPost?.comments?.map((c, i) => (
+          {currentPost?.comments?.map((c: any, i: any) => (
             <div key={i} className="flex gap-2.5 items-start">
               <img
                 src={c.userImage ? `https://instagram-api.softclub.tj/images/${c.userImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
