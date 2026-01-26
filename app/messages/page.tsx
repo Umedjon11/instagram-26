@@ -20,8 +20,10 @@ import {
   Image,
   Info,
   Mic,
+  MonitorUp,
   Phone,
   Search,
+  SearchAlert,
   Send,
   Smile,
   SquarePen,
@@ -33,6 +35,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import EmojiPicker from "emoji-picker-react";
+import VideoCall from "@/components/messageComponents/VideoCall";
+import { jwtDecode } from "jwt-decode";
+import { getToken } from "@/utils/axios";
 
 const Messages = () => {
   const dispatch = useDispatch() as any;
@@ -179,7 +184,7 @@ const Messages = () => {
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.type.startsWith("image/") && activeChat) {
+    if (file && activeChat) {
       dispatch(
         sendChatMessage({
           chatId: activeChat.chatId,
@@ -193,6 +198,10 @@ const Messages = () => {
     }
   };
 
+  const [callStatus, setCallStatus] = useState<"calling" | "connected">(
+    "calling",
+  );
+
   const handleStartChat = (userId: string) => {
     dispatch(createChat(userId))
       .unwrap()
@@ -203,9 +212,66 @@ const Messages = () => {
         console.error("Ошибка при создании чата:", err);
       });
   };
+  const callAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const [search, setSearch] = useState("");
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [openCall, setOpenCall] = useState(false);
+  const [callSeconds, setCallSeconds] = useState(0);
+
+  useEffect(() => {
+    if (!openCall || callStatus !== "connected") return;
+
+    setCallSeconds(0);
+
+    const interval = setInterval(() => {
+      setCallSeconds((s) => s + 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [openCall, callStatus]);
+
+  const formatTime = (sec: number) => {
+    const m = String(Math.floor(sec / 60)).padStart(2, "0");
+    const s = String(sec % 60).padStart(2, "0");
+    return `${m}:${s}`;
+  };
+
+  const [openVideoCall, setOpenVideoCall] = useState(false);
+  useEffect(() => {
+    if (openCall && callStatus === "calling") {
+      if (!callAudioRef.current) {
+        callAudioRef.current = new Audio("/sounds/calling.mp3");
+        callAudioRef.current.loop = true;
+        callAudioRef.current.volume = 0.6;
+      }
+      callAudioRef.current.play().catch(() => {});
+    } else {
+      callAudioRef.current?.pause();
+      if (callAudioRef.current) callAudioRef.current.currentTime = 0;
+    }
+
+    return () => {
+      callAudioRef.current?.pause();
+      if (callAudioRef.current) callAudioRef.current.currentTime = 0;
+    };
+  }, [openCall, callStatus]);
+
+  useEffect(() => {
+    if (!openCall || callStatus !== "calling") return;
+
+    const t = setTimeout(() => {
+      setCallStatus("connected");
+    }, 4000);
+
+    return () => clearTimeout(t);
+  }, [openCall, callStatus]);
+
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [searching, setSearching] = useState("");
+  const token = getToken();
+
+  const user: any = token ? jwtDecode(token) : null;
 
   return (
     <>
@@ -233,6 +299,8 @@ const Messages = () => {
                   className="absolute left-35 top-22 z-0 -translate-y-1/2"
                 />
                 <input
+                  value={searching}
+                  onChange={(e) => setSearching(e.target.value)}
                   type="text"
                   placeholder="Search"
                   className="outline-none bg-transparent w-full pl-10"
@@ -246,27 +314,33 @@ const Messages = () => {
             </article>
 
             <article className="flex flex-col gap-1">
-              {chats?.data?.map((e: any) => (
-                <div
-                  key={e.id}
-                  onClick={() => openChat(e)}
-                  className="flex items-start gap-3 p-2 rounded-[7px] cursor-pointer hover:bg-[#e6e4e466] dark:hover:bg-[#5a595935]"
-                >
-                  <img
-                    className="w-12 h-12 rounded-full object-cover"
-                    src={
-                      e.receiveUserImage
-                        ? `https://instagram-api.softclub.tj/images/${e.receiveUserImage}`
-                        : "https://th.bing.com/th/id/R.cf617bf1054e50f7321d18574d8192c8?rik=sAwHhwnmQRBgbA&pid=ImgRaw&r=0"
-                    }
-                    alt=""
-                  />
-                  <div className="flex flex-col">
-                    <h1>{e.receiveUserName}</h1>
-                    <p className="text-[13px] text-[grey]">Active 4h ago</p>
+              {chats?.data
+                ?.filter((e: any) =>
+                  e.receiveUserName
+                    .toLowerCase()
+                    .includes(searching.toLowerCase()),
+                )
+                .map((e: any) => (
+                  <div
+                    key={e.id}
+                    onClick={() => openChat(e)}
+                    className="flex items-start gap-3 p-2 rounded-[7px] cursor-pointer hover:bg-[#e6e4e466] dark:hover:bg-[#5a595935]"
+                  >
+                    <img
+                      className="w-12 h-12 rounded-full object-cover"
+                      src={
+                        e.receiveUserImage
+                          ? `https://instagram-api.softclub.tj/images/${e.receiveUserImage}`
+                          : "https://th.bing.com/th/id/R.cf617bf1054e50f7321d18574d8192c8?rik=sAwHhwnmQRBgbA&pid=ImgRaw&r=0"
+                      }
+                      alt=""
+                    />
+                    <div className="flex flex-col">
+                      <h1>{e.receiveUserName}</h1>
+                      <p className="text-[13px] text-[grey]">Active 4h ago</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </article>
           </section>
         </section>
@@ -315,8 +389,23 @@ const Messages = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-5">
-                    <Phone />
-                    <Video />
+                    <Phone
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setCallStatus("calling");
+                        setOpenVideoCall(false);
+                        setOpenCall(true);
+                      }}
+                    />
+
+                    <Video
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setOpenCall(false);
+                        setOpenVideoCall(true);
+                      }}
+                    />
+
                     {openInfoPanel ? (
                       <X
                         className="cursor-pointer"
@@ -334,28 +423,9 @@ const Messages = () => {
                 </div>
                 <div className="border-t w-[100%]"></div>
 
-                <div className="flex-1 overflow-x-auto flex flex-col justify-between h-[640px] p-2">
-                  <div className="p-4 flex flex-col items-center gap-1">
-                    <img
-                      className="w-25 h-25 rounded-full"
-                      src={
-                        activeChat.receiveUserImage
-                          ? `https://instagram-api.softclub.tj/images/${activeChat.receiveUserImage}`
-                          : "https://th.bing.com/th/id/R.cf617bf1054e50f7321d18574d8192c8?rik=sAwHhwnmQRBgbA&pid=ImgRaw&r=0"
-                      }
-                      alt="error"
-                    />
-                    <h1 className="mt-2 font-medium text-lg">
-                      {activeChat.receiveUserName}
-                    </h1>
-                    <p className="text-[grey] text-[13px]">Instagram</p>
-                    <Link href={`/profile/info/${activeChat.id}`}>
-                      <button className="mt-2 bg-[#d9d9d965] font-medium p-1 rounded-[10px] w-30 hover:bg-[#d9d9d9b4] dark:bg-[#5f5c5c52]">
-                        View profile
-                      </button>
-                    </Link>
-                  </div>
-                  <div className="flex flex-col gap-1 w-full px-4">
+                <div className="relative flex flex-col h-[640px]">
+                  <p className="m-[3vh_auto] p-[0.1vh_5px] text-[10px] rounded-full font-semibold bg-[#80808051]">{chatById[0]?.sendMassageDate.split("T")[0]}</p>
+                  <div className="flex p-[2vh_0] flex-col gap-1 w-full px-4 overflow-y-auto pb-28">
                     {chatById?.map((msg: any) => {
                       console.log("Рендерим сообщение:", msg);
 
@@ -368,12 +438,10 @@ const Messages = () => {
                       return (
                         <div
                           key={msg.messageId}
-                          className={`group relative flex items-center gap-2 ${
-                            isMine ? "justify-end" : "justify-start"
-                          }`}
+                          className={`group relative flex items-center gap-2 w-fit ${user && user.sid == msg.userId ? "ml-auto" : ""}`}
                         >
-                          {!isMine && (
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
+                          {user && user.sid == msg.userId && (
+                            <div className="opacity-0 ml-auto mr-0 mt-auto w-fit group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
                               <button
                                 className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
                                 onClick={() =>
@@ -402,36 +470,63 @@ const Messages = () => {
                           )}
 
                           <div
-                            className={`flex flex-col p-1 px-2 rounded-2xl max-w-[300px] break-words whitespace-pre-wrap ${
-                              isMine
+                            className={`flex flex-col p-1 px-2 rounded-2xl max-w-80 break-words whitespace-pre-wrap ${
+                              user && user.sid == msg.userId
                                 ? "bg-blue-500 text-white"
                                 : "bg-gray-200 dark:bg-gray-700 text-black dark:text-white"
                             }`}
                           >
                             {msg.messageText && <div>{msg.messageText}</div>}
 
-                            {msg.fileUrl &&
-                              msg.fileType.startsWith("image") && (
-                                <img
-                                  src={msg.fileUrl}
-                                  className="w-40 h-40 object-cover rounded"
-                                />
-                              )}
+                            {msg.file && msg.file.endsWith("png") && (
+                              <img
+                                src={`https://instagram-api.softclub.tj/images/${msg.file}`}
+                                className="object-cover rounded"
+                              />
+                            )}
+                            {msg.file && msg.file.endsWith("jpg") && (
+                              <img
+                                src={`https://instagram-api.softclub.tj/images/${msg.file}`}
+                                className="object-cover rounded"
+                              />
+                            )}
+                            {msg.file && msg.file.endsWith("svg") && (
+                              <img
+                                src={`https://instagram-api.softclub.tj/images/${msg.file}`}
+                                className=" object-cover rounded"
+                              />
+                            )}
 
-                            {msg.fileUrl &&
-                              msg.fileType.startsWith("video") && (
+                            {msg.file && msg.file.endsWith("mp4") && (
+                              <video
+                                src={`https://instagram-api.softclub.tj/images/${msg.file}`}
+                                controls
+                                className="object-cover rounded"
+                              />
+                            )}
+
+                            {msg.file && msg.file.endsWith("webm") && (
+                              <audio
+                                src={`https://instagram-api.softclub.tj/images/${msg.file}`}
+                                controls
+                              />
+                            )}
+
+                            {msg.file &&
+                              msg.file.endsWith("video") && (
                                 <video
-                                  src={msg.fileUrl}
+                                  src={msg.file}
                                   controls
                                   className="w-40 h-40 rounded"
                                 />
                               )}
 
-                            {msg.fileUrl &&
-                              msg.fileType.startsWith("audio") && (
-                                <audio src={msg.fileUrl} controls />
+                            {msg.file &&
+                              msg.file.endsWith("audio") && (
+                                <audio src={msg.file} controls />
                               )}
                           </div>
+                          <p className="text-[10px] ml-auto mt-auto">{msg?.sendMassageDate.split("T")[1].split(".")[0].slice(0, 5)}</p>
 
                           {isMine && (
                             <div className="opacity-0  group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
@@ -493,16 +588,15 @@ const Messages = () => {
                     </div>
                   </div>
                 )}
-                <div className="p-4">
+                <div className="flex items-center gap-1 p-2 border rounded-2xl w-full bg-white/60 dark:bg-black/40">
                   <input
                     type="file"
-                    accept="image/*"
                     ref={fileInputRef}
                     onChange={handleImageSelect}
                     className="hidden"
                   />
 
-                  <div className="flex items-center gap-2 p-2 border rounded-2xl w-full relative">
+                  <div className="flex mt-[-65px] bg-[white] dark:bg-[black] dark:text-[white] items-center gap-1 p-2 border rounded-2xl w-full relative">
                     <button
                       type="button"
                       onClick={() => setShowEmojiPicker(!showEmojiPicker)}
@@ -510,13 +604,12 @@ const Messages = () => {
                     >
                       <Smile />
                     </button>
-
                     <input
                       type="text"
                       placeholder="Message..."
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      className="flex-1 outline-none bg-transparent"
+                      className=" flex-1 z-10  outline-none "
                     />
 
                     {showEmojiPicker && (
@@ -626,13 +719,109 @@ const Messages = () => {
         </section>
       </div>
 
+      {openVideoCall && (
+        <VideoCall
+          openVideoCall={openVideoCall}
+          setOpenVideoCall={setOpenVideoCall}
+          activeChat={activeChat}
+        />
+      )}
+
+      {openCall && (
+        <div
+          className={`
+      group fixed z-[9999] bg-black transition-all duration-300 ease-in-out
+      ${
+        isMinimized
+          ? "w-72 h-44 bottom-4 right-4 rounded-2xl flex items-center justify-center"
+          : "inset-0 flex flex-col items-center justify-center"
+      }
+    `}
+        >
+          {!isMinimized && (
+            <>
+              <img
+                src={
+                  activeChat?.receiveUserImage
+                    ? `https://instagram-api.softclub.tj/images/${activeChat.receiveUserImage}`
+                    : "https://th.bing.com/th/id/R.cf617bf1054e50f7321d18574d8192c8?rik=sAwHhwnmQRBgbA&pid=ImgRaw&r=0"
+                }
+                className="w-40 h-40 rounded-full object-cover mb-12"
+                alt=""
+              />
+
+              <h1 className="text-white text-3xl font-semibold mb-2">
+                {activeChat?.receiveUserName}
+              </h1>
+
+              <p className="text-gray-400 mb-10 text-lg tracking-wide">
+                {callStatus === "calling" ? (
+                  <span className="animate-pulse">Calling…</span>
+                ) : (
+                  formatTime(callSeconds)
+                )}
+              </p>
+            </>
+          )}
+
+          {isMinimized && (
+            <div className="flex flex-col items-center  text-white">
+              <img
+                src={
+                  activeChat?.receiveUserImage
+                    ? `https://instagram-api.softclub.tj/images/${activeChat.receiveUserImage}`
+                    : "https://th.bing.com/th/id/R.cf617bf1054e50f7321d18574d8192c8?rik=sAwHhwnmQRBgbA&pid=ImgRaw&r=0"
+                }
+                className="w-10 h-10 rounded-full object-cover mb-12"
+                alt=""
+              />
+              <span className="text-sm relative top-[-40px] opacity-70">
+                {callStatus === "calling"
+                  ? "Calling…"
+                  : formatTime(callSeconds)}
+              </span>
+            </div>
+          )}
+
+          <div
+            className={`
+        absolute bottom-3 left-1/2 -translate-x-1/2
+        flex gap-3 transition-opacity duration-300
+        ${isMinimized ? "opacity-0 group-hover:opacity-100" : "opacity-100"}
+      `}
+          >
+            <button className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition">
+              <Mic className="text-white" />
+            </button>
+
+            <button className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition">
+              <Video className="text-white" />
+            </button>
+
+            <button
+              onClick={() => setIsMinimized((prev) => !prev)}
+              className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition"
+            >
+              <MonitorUp className="text-white" />
+            </button>
+
+            <button
+              onClick={() => setOpenCall(false)}
+              className="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center hover:bg-red-500 transition"
+            >
+              <Phone className="text-white rotate-[135deg]" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {openSendMessage && (
         <div
           className="fixed inset-0 bg-black/50 flex justify-center items-center z-50"
           onClick={() => setOpenSendMessage(false)}
         >
           <div
-            className="bg-white rounded-[20px] relative w-11/12 max-w-130 shadow-lg"
+            className="bg-white rounded-[20px] dark:bg-black relative w-11/12 max-w-130 shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-4">
@@ -664,7 +853,7 @@ const Messages = () => {
               <h1 className="font-medium">Suggested</h1>
               <div className="flex flex-col  overflow-x-auto h-100 items-start gap-3 mt-2">
                 {data
-                  ?.filter((item) =>
+                  ?.filter((item: any) =>
                     item.userName.toLowerCase().includes(search.toLowerCase()),
                   )
                   ?.map((item: any) => {
