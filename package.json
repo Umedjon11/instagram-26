@@ -33,6 +33,7 @@
     "react-insta-stories": "^2.8.0",
     "react-redux": "^9.2.0",
     "react-speech-recognition": "^4.0.1",
+    "react-webcam": "^7.2.0",
     "swiper": "^12.0.3",
     "tailwind-merge": "^3.4.0"
   },
