@@ -1,9 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { axiosRequest } from '@/utils/axios'
 
+
 export const getReels = createAsyncThunk('reels/getReels', async () => {
     try {
-        const { data } = await axiosRequest.get('/Post/get-reels?PageNumber=1&PageSize=20')
+        const { data } = await axiosRequest.get('/Post/get-reels?PageNumber=1&PageSize=30')
         return data.data
     } catch (error) {
         console.error(error)
@@ -13,7 +14,7 @@ export const getReels = createAsyncThunk('reels/getReels', async () => {
 export const getPostById = createAsyncThunk('reels/getPostById', async (id: number) => {
     try {
         const { data } = await axiosRequest.get(`/Post/get-post-by-id?id=${id}`)
-        return data.data 
+        return data.data
     } catch (error) {
         console.error(error)
     }
@@ -22,19 +23,32 @@ export const getPostById = createAsyncThunk('reels/getPostById', async (id: numb
 export const Postlike = createAsyncThunk('reels/Postlike', async (id: number, { dispatch }) => {
     try {
         await axiosRequest.post(`/Post/like-post?postId=${id}`)
-        dispatch(getPostById(id)) 
+        dispatch(getPostById(id))
     } catch (error) {
         console.error(error)
     }
 })
 
-export const Postkomment = createAsyncThunk('reels/Postkomment', async (obj: {id: number, komment: string}, { dispatch }) => {
+export const Save = createAsyncThunk('reels/Save',async (postId: number, { dispatch }) => {
+        try {
+            await axiosRequest.post(`/Post/add-post-favorite`, {
+                postId: postId
+            });
+            dispatch(getReels());
+        } catch (error) {
+            console.error(error);
+        }
+    }
+)
+
+
+export const Postkomment = createAsyncThunk('reels/Postkomment', async (obj: { id: number, komment: string }, { dispatch }) => {
     try {
         const response = await axiosRequest.post(`/Post/add-comment`, {
-            comment: obj.komment, 
+            comment: obj.komment,
             postId: obj.id
         })
-        if(response.data) {
+        if (response.data) {
             await dispatch(getPostById(obj.id))
         }
         return response.data
@@ -44,10 +58,38 @@ export const Postkomment = createAsyncThunk('reels/Postkomment', async (obj: {id
     }
 })
 
+
+export const followUser = createAsyncThunk('reels/followUser', async (userId: string, { dispatch }) => {
+    try {
+        const response = await axiosRequest.post(
+            `/FollowingRelationShip/add-following-relation-ship?followingUserId=${userId}`
+        );
+        dispatch(getReels());
+        return response.data;
+    } catch (error: any) {
+        console.error(error.response?.data);
+    }
+}
+);
+
+export const unfollowUser = createAsyncThunk('reels/unfollowUser', async (userId: string, { dispatch }) => {
+    try {
+        const response = await axiosRequest.delete(
+            `/FollowingRelationShip/delete-following-relation-ship?followingUserId=${userId}`
+        );
+        dispatch(getReels());
+        return response.data;
+    } catch (error: any) {
+        console.error(error.response?.data);
+    }
+}
+);
+
 const reelsSlice = createSlice({
     name: 'reels',
     initialState: {
         data: [] as any[],
+        loading: false
     },
     reducers: {},
     extraReducers: (builder) => {

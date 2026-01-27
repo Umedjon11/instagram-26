@@ -86,6 +86,7 @@ export default function UploadPostModal() {
     fd.append("Content", caption2)
     try {
       await axiosRequest.post("/Post/add-post", fd)
+      window.location.reload
       router.push("/profile")
     } catch (error) {
       console.error(error);
@@ -104,7 +105,7 @@ export default function UploadPostModal() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+    <div className="fixed inset-0 z-1000000000 flex items-center justify-center bg-black/70">
       <div className="overflow-hidden rounded-xl bg-[#262626] text-white">
         <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
           {step > 0 ? (
