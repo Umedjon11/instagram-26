@@ -3,9 +3,11 @@ import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { getReels, Postkomment, Postlike, followUser, unfollowUser, Save } from '@/reducers/reels'
 import { RootState, AppDispatch } from '@/store/store'
-import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Music2, X, Smile } from 'lucide-react'
-import Link from 'next/link'
+import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Music2, Smile, Link, X } from 'lucide-react'
 
+interface Comment {
+  postCommentId: number;
+}
 interface ReelElement {
   postId: number;
   userId: string;
@@ -23,9 +25,10 @@ interface ReelElement {
 
 const Reels = () => {
   const dispatch = useDispatch<AppDispatch>()
-  const { data } = useSelector((state: RootState) => state.reels) as { data: ReelElement[] }
+
+  const { data } = useSelector((state: RootState) => state.reels)
   const [openPostId, setOpenPostId] = useState<number | null>(null)
-  const [commentText, setCommentText] = useState<string>("")
+  const [commentText, setCommentText] = useState("")
   const [followedUsers, setFollowedUsers] = useState<Set<string>>(new Set())
 
   useEffect(() => {
@@ -209,7 +212,7 @@ const Reels = () => {
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-5 scrollbar-hide">
-          {currentPost?.comments?.map((c, i) => (
+          {currentPost?.comments?.map((c: any, i: any) => (
             <div key={i} className="flex gap-2.5 items-start">
               <img
                 src={c.userImage ? `https://instagram-api.softclub.tj/images/${c.userImage}` : "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
