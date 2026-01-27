@@ -167,6 +167,7 @@ const Reels = () => {
                 </div>
               </div>
 
+
               <div className="absolute right-2 bottom-6 flex flex-col items-center gap-4 text-white z-10">
                 <div className="flex flex-col items-center">
                   <button type="button" aria-label="Like post" onClick={() => dispatch(Postlike(elem.postId))} className="p-1.5 hover:scale-110 transition active:opacity-50">
