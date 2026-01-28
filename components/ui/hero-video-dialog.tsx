@@ -374,6 +374,7 @@ export default function UploadPostModal() {
           )}
         </div>
       </div>
+      
     </div>
   )
 }
